@@ -30,7 +30,7 @@ The R install packages are located in the subdirectory packages.
 
 ###DOCUMENTATION
 
-To use Xtail, please refer to the instructions in MANUAL in this directory.
+To use Xtail, please refer to the instructions in xtail.pdf in this subdirectory source/inst/doc.
 
 ###LICENSE
 
