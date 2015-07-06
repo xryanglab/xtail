@@ -1,5 +1,5 @@
 Windows:
-Before install, you need install "Rtools", "MainGW"; 
-   Then using the following command to install: install.packages("xtail_0.0.1.tar.gz",repo=NULL,type="source")
+Before install, you need install "Rtools", "MainGW";     
+Then using the following command to install: install.packages("xtail_0.0.1.tar.gz",repo=NULL,type="source")
 Linux,Mac:
 install.package("xtail_0.0.1.tar.gz")
