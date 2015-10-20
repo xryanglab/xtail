@@ -1,0 +1,135 @@
+%\VignetteIndexEntry{xtail}
+%\VignetteDepends{xtail}
+%\VignetteKeywords{xtail}
+%\VignettePackage{xtail}
+%\VignetteEngine{knitr::knitr}
+
+% To compile this document
+% library('knitr');rm(list=ls());knit('xtail.Rnw')
+
+\documentclass[a4paper]{article}
+\newcommand{\lowtilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+<<knitr, echo=FALSE, results="hide">>=
+library("knitr")
+@
+
+\title{Genome-wide assessment of differential translations with ribosome profiling data \\-- the xtail package}
+\author{Zhengtao Xiao$^{1-3}$, Qin Zou$^{1,3}$, Yu Liu$^{1-3}$, and Xuerui Yang$^{1-3}$
+\\[1em] \small{$^{1}$MOE Key Laboratory of Bioinformatics, }
+\\ \small{$^{2}$Tsinghua-Peking Joint Center for Life Sciences,}
+\\ \small{$^{3}$School of Life Sciences, Tsinghua University, Beijing 100084, China.}}
+
+<<<style,eval=TRUE,echo=FALSE,results='asis'>>=
+BiocStyle::latex()
+@
+
+
+\begin{document}
+
+<<include=FALSE>>=
+library(knitr)
+opts_chunk$set(
+concordance=TRUE
+)
+@
+
+\maketitle
+\section{Introduction}
+
+This package is for identifing genes undergoing differential translation with ribosome profiling data. A simple assumption of our method is that for a gene undergoing translational dyresgulation under certain experimental or physiological condition, the change of its RPF abundance should be discoordinated with the change of its mRNA abundance. Based on the this assumptions, Xtail estimates log2 fold changes (log2FC) of RPF and mRNA accross two conditions, separately, and uses ratio of these two fold changes (ratio of fold changes, ROF) as the magnitude of differential translation.  It also estimates log2 ratio (log2R) of RPF over mRNA in two conditions, this is mathematically equal to log2FC, and then taking fold change of these two ratios (fold change of ratios, FOR) across two conditions. Then, Xtail tests for each gene whether the log2FC of RPF and log2FC of mRNA differ significantly, and also compares the log2R of RPF over mRNA between the two conditions. Finally, the two P-values by comparing log2FC and log2R are return, and larger one was select as the final P-values for differential translations.
+
+The general outline of Xtail is illustrated in Figure 1. First, we implement the negative binomial (NB) distribution as the model for count variability of both mRNA and RPF. We adapt the strategy of DESeq2 [1] to normalize read counts of mRNA and RPF in all samples, and fit NB distributions with dispersions $\alpha$ and $\mu$. Then, with the NB distributions of RPF and mRNA estabished in both conditions, we derived probability density distributions of the log2FC of mRNA and RPF, by comparing two experimental groups. Similarly, probability density distributions of the log2R of RPF over mRNA were also derived in each of the two experimental groups. For each gene, Xtail tests wherther log2FC of RPF and log2FC of mRNA different significntly. This is done by crossing the probability density distributions of log2FC for mRNA and RPF to generate a joint probability matrix, and taking summation of the upper or lower triangle, whichever the smaller, of the matrix as the P-value. We also compare two logR of RPF over mRNA between the two conditions. With the similar method, a P-value of two probability distributions of log2R is also return. Finally, the larger P-value is selected as the final P-value for differential translations. The overlap of two log2FC distribution of RPF and mRNA, OVL, is also used to measure similarity of RPF and mRNA changes. Smaller overlaps suggest uncoordinated changes of RPF and mRNA across different conditions, supporting differential translations.
+\begin{figure}
+\centering
+\includegraphics[width=.45\textwidth]{xtail_figure.pdf}
+\caption{
+  \textbf{Schematic description of Xtail.}
+  Xtail is designed to identify differential translations from mRNA and RPF read counts across two conditions, condition 1(C1) and 2(C2). By comparing log2 fold change (log2FC, left) of RPF and mRNA, or log2 ratios (log2R, right) across conditons, Xtail infers the magnitude of differential translations (A) and evaluates the statistical significance with P-value (B).
+}
+\label{xtail_figure}
+\end{figure}
+
+\newpage
+\section{Data Preparation}
+
+As input, the \verb'Xtail' package uses raw read counts of RPF and mRNA, in the form of rectangular table of integer values. The rows and the columns of the table correspond the genes and samples. Each cell in the \textsl{i-th} row and the \textsl{j-th} columns is the count number of reads mapped to gene \textsl{i} in sample \textsl{j}. The mRNA count data and RPF count data are stored in two text files. We can read them in using \textbf{R}'s standard function. For example,
+
+<<readData,eval=FALSE>>=
+mrna <- read.table("mRNA_counts.txt", header=TRUE, row.names=1)
+rpf <- read.table("RPF_counts.txt", header=TRUE,row.names=1)
+@
+
+
+Here, header=TRUE indicates that the first line contains columns names and row.names=1 means that the first column should be used as row names (genes names).
+
+In this vignette, we selected a published ribosome profiling dataset from yeast after amino acid starvation [2]. This dataset consisting of 4952 genes from two conditions ("rich" vs. "starvation") with each condition having two replicates. We can load this dataset by,
+<<loadData, eval=FALSE>>=
+data(testdata)
+@
+
+\section{An Example}
+
+Here we perform an analysis on the ribosome profiling data described above. First we load the library and data.
+
+<<begain,results="hold",message=FALSE>>=
+library(xtail)
+data(testdata)
+@
+
+
+Next we can have a look at the first five lines of the mRNA (\verb'mrna') and RPF (\verb'rpf') elements of \verb'testdata'.
+
+<<>>=
+mrna <- testdata$mrna
+rpf <- testdata$rpf
+head(mrna,5)
+head(rpf,5)
+@
+
+
+We assign condition labels corresponding to the columns of the mRNA and RPF inputs.
+
+<<>>=
+condition <- c("rich","rich","starvation","starvation")
+@
+
+
+We run the main function, \verb'xtail()'. By default, the \verb'baseLevel' is set to the first condition (here is "rich"). This control the log2FC or log2R as the expected comparison against the baseLevel. The argument \verb'minMeanCount' is set to 10. This is the minimum average expression of mRNA counts and RPF counts acrossing all experiments for a gene to be used. The argument threadsNo is the number of CPU cores for using. By default, \verb'threadsNo' is set to 'NA', so the \verb'detectCores' function in \verb'parallel' library is used to determine the available cores. The argument \verb'bins' is the number of bins used for calculate the probability densities of log2FC and log2R. This paramater will determine how accurate the final pvalue. Here, in order to keep the run-time of this vignette small, we will set \verb'bins' to '1000'.
+
+<<>>=
+test.results <- xtail(mrna,rpf,condition,bins=1000)
+@
+
+
+Now we can examine the first five lines of the results produced by the \verb'xtail()' run.
+
+<<inspectData,echo=TRUE>>=
+head(test.results,5)
+@
+
+
+The elements \verb'mRNA_log2FC' and \verb'RPF_log2FC' are log2 fold changes of mRNA and RPF comparson with baseLevel conditon. The \verb'OVL_log2FC' is the overlap coefficence between mRNA and RPF log2FC distributions, which suggest coordinated RPF and mRNA changes. Smaller OVL suggest uncoordinated changes of RPF and mRNA across different coditions, supporting differential translations. \verb'pvalue_log2FC' tells us the statistical significance of differential translations. The \verb'rich_log2R', \verb'starvation_log2R' represent log2 ratio of RPF over mRNA in each condition. The \verb'final_pvalues' is the final pvalue for differential translations. The \verb'FDR' is the estimated false discovery rate corresponding to the gene for the \verb'final_pvalue'.
+
+Finally, the plain-text file of the results can be exported using the base \textbf{R} functions \textsl{write.csv} or \textsl{write.table}.
+
+<<writeResult,eval=FALSE>>=
+write.table(test.results,"test_results.txt",quote=F,sep="\t")
+@
+
+
+\section*{Session Info}
+
+<<sessInfo>>=
+sessionInfo()
+@
+
+
+\begin{thebibliography}{99}
+\bibitem{DESeq2}
+Love MI, Huber W, Anders S: \textsl{Moderated Estimation of Fold Change and Dispersion for RNA-Seq Data with DESeq2}. 2014.
+\bibitem{Ingolia}
+Ingolia NT, Ghaemmaghami S, Newman JRS, Weissman JS: \textsl{Genome-wide analysis in vivo of translation with nucleotide resolution using ribosome profiling.} Science 2009, 324:218,223.
+\end{thebibliography}
+
+
+\end{document}
