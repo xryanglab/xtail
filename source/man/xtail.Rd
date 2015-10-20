@@ -2,28 +2,28 @@
 \alias{xtail}
 \docType{package}
 \title{
-A tool to analyze differential translation using ribosome profiling data.
+A tool to quantitatively assess differential translations with ribosome profiling data.
 }
 \description{
-By pairwise comparisons of ribosome profiling data, xtail identifies differentially translated genes.
+By pairwise comparisons of ribosome profiling data, xtail identifies differentially translated genes across two experimental or physiological conditions.
 }
 \usage{
 xtail(mrna,rpf,condition,baseLevel=NA,minMeanCount=1,ci=0.95,...)
 }
 \arguments{
-  \item{mrna}{a matrix or data frame of raw mRNA count data whose rows correspond to genes and columns correspond to samples.}
-  \item{rpf}{a matrix or data frame of raw (not normalized) RPF count data whose rows correspond to genes and columns correspond to samples.}
-  \item{condition}{condition lavels corresponding to the samples in mrna and rpf. There must be exactly two unique values.}
-  \item{baseLevel}{The baseLevel is a label that assign the condition be compared. If \code{xtail} is run without specifying baseLevel, it will return the comparison of the second condition over the first condition.}
+  \item{mrna}{a matrix or data frame of raw mRNA count data whose rows correspond to genes and columns correspond to samples. The column names should be non-empty, and in same order with condition.}
+  \item{rpf}{a matrix or data frame of raw (not normalized) RPF count data whose rows correspond to genes and columns correspond to samples.The column names should be non-empty, and in same order with condition.}
+  \item{condition}{condition labels corresponding to the samples in mrna and rpf. There must be exactly two unique values.}
+  \item{baseLevel}{The baseLevel indicates which one of the two conditions will be compared against by the other one. If not specified, \code{Xtail} will return results of comparing the second condition over the first one.}
   \item{minMeanCount}{\code{xtail} uses the average expression level of each gene, across all samples as filter criterion and it omits all genes with mean counts below minMeanCount.}
-  \item{ci}{The level credible intervals of log2 fold change of translational efficiency (TE). Default is 95\%.}
-  \item{normalize}{If normalization should be done (TRUE \\ FALSE). Default is to apply the median-of-ratios normlazation method.}
+  \item{ci}{The level of confindence to get credible intervals of log2 fold change of translational efficiency (TE), by default 95\%.}
+  \item{normalize}{Whether normalization should be done (TRUE \\ FALSE). If missing, \code{Xtail} will perform median-of-ratios normlazation by default.}
   \item{method.adjust}{The method to use for adjusting multiple comparisons, see \code{?p.adjust} }
   \item{threads}{The number of CPU cores used. By default, all available  cores are used.}
-  \item{bins}{The number of bins used for calculate the probability density of log2FC or log2R. (default is 10000) This paramater will determine accuracy of pvalue.Set it small for a very quick test run.}
+  \item{bins}{The number of bins used for calculating the probability density of log2FC or log2R (default is 10000). This paramater will determine accuracy of pvalue. Set it small for a very quick test run.}
 }
 \details{
-  No missing values are allowed.
+  No missing values are allowed in input data mrna and rpf.
 
   Duplicate row names (gene names or gene ids) are not allowed.
 
