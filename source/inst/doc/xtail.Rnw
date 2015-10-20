@@ -1,0 +1,130 @@
+%\VignetteIndexEntry{xtail}
+%\VignetteDepends{xtail}
+%\VignetteKeywords{xtail}
+%\VignettePackage{xtail}
+%\VignetteEngine{knitr::knitr}
+
+% To compile this document
+% library('knitr');rm(list=ls());knit('xtail.Rnw')
+
+\documentclass[a4paper]{article}
+\newcommand{\lowtilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+<<knitr, echo=FALSE>>=
+library("knitr")
+@
+
+\title{Genome-wide assessment of differential translations with ribosome profiling data \\-- the xtail package}
+\author{Zhengtao Xiao$^{1-3}$, Qin Zou$^{1,3}$, Yu Liu$^{1-3}$, and Xuerui Yang$^{1-3}$
+\\[1em] \small{$^{1}$MOE Key Laboratory of Bioinformatics, }
+\\ \small{$^{2}$Tsinghua-Peking Joint Center for Life Sciences,}
+\\ \small{$^{3}$School of Life Sciences, Tsinghua University, Beijing 100084, China.}}
+
+<<<style,eval=TRUE,echo=FALSE,results='asis'>>=
+BiocStyle::latex()
+@
+
+
+\begin{document}
+
+<<include=FALSE>>=
+library(knitr)
+opts_chunk$set(
+concordance=TRUE
+)
+@
+
+\maketitle
+\section{Introduction}
+
+This package is for identifing genes undergoing differential translation with ribosome profiling data. Xtail stats with a simple assumption that if a gene undergoing translational dyresgulation under certain exprimental or physiological condition, the change of its RPF abundance should be discoordinated with that of mRNA expression. Therefore, Xtail first estimates fold changes of RPF and mRNA across two conditions, separately, to quantify the magnitude of differential translation. In a parallel process, Xtail also  estimates ratios of RPF over mRNA, in two conditions, to assess the differential translation. This strategy avoids fase disvoeries of differential translation due to extremely larger expression change in mRNA or RPF between two conditions.
+
+\verb'Xtail' consists of three major steps: (1) modeling of ribosome profiling data using negative binomial distribution (NB), (2) estabilishment of probability distributions for fold changes of mRNA or RPF (or RPF-to mRNA ratios), and (3) evaluation of statistical significance and magnitude of differential translations. The differential translation of each gene is evaluated by two parallel: one is difference of log2 fold change of mRNA and RPF across two condition, another one is difference of log2 ratio of RPF over mRNA between two conditions. The more conserved one is selected as the final assement of differential translation.
+
+As default, the package adapts the strategy of DESeq2 [1] to normalize read counts of mRNA and RPF in all samples, and fits NB distributions with dispersions $\alpha$ and $\mu$.
+
+This guide provides step-by-step instructions on how to load data, how to excute the package and how to interpret output.
+\newpage
+\section{Data Preparation}
+
+As input, the \verb'Xtail' package uses read counts of RPF and mRNA, in the form of rectangular table of values. The rows and columns of the table correspond the genes and samples. Each cell in the \textsl{g-th} row and the \textsl{i-th} columns is the count number of reads mapped to gene \textsl{g} in sample \textsl{i}. The mRNA count data and RPF count data are stored in two text files.We can read them in using \textbf{R}'s standard function. For example,
+
+<<readData,eval=FALSE>>=
+mrna <- read.table("mRNA_counts.txt", header=TRUE, row.names=1)
+rpf <- read.table("RPF_counts.txt", header=TRUE, row.names=1)
+@
+
+Here, header=TRUE indicates that the first line contains columns names and row.names=1 means that the first column should be used as row names (gene names or gene ID).
+
+Xtail takes in raw read counts of RPF and mRNA, and performs median-of-ratios normalization by default. This normalization method is also recommend by Reddy R. [2]. Alternatively, users can provide normalized read counts and skip the built-in normalization in Xtail.
+
+In this vignette, we select a published ribosome profiling dataset from human prostate cancer cell PC3 after mTOR signaling inhibition with PP242 [3]. This dataset consist of 11391 genes from two conditions ("treatment" vs. "control") with each condition having two replicates.
+
+\section{An Example}
+
+Here we perform an analysis on the ribosome profiling data described above. First we load the library and data.
+
+<<begain,results="hold",message=FALSE>>=
+library(xtail)
+data(xtaildata)
+@
+
+
+Next we can view the first five lines of the mRNA (\verb'mrna') and RPF (\verb'rpf') elements of \verb'xtaildata'.
+
+<<>>=
+mrna <- xtaildata$mrna
+rpf <- xtaildata$rpf
+head(mrna,5)
+head(rpf,5)
+@
+
+
+We assign condition labels corresponding to the columns of the mRNA and RPF inputs.
+
+<<>>=
+condition <- c("control","control","treat","treat")
+@
+
+
+Next, we run the main function, \Rfunction{xtail()}. By default, the second condition (here is "treat") would be compared against the first condition (here is "control"). Those genes with the minimum average expression of mRNA counts and RPF counts acrossing all conditions larger than 1 are used (can be changed by set \verb'minMeanCount'). All the available CPU cores are used for running program. The argument \verb`"bins"` is the number of bins used for calculating the probability densities of log2FC and log2R. This paramater will determine how accurate the final pvalue. Here, in order to keep the run-time of this vignette small, we will set \verb'bins' to "1000". Detailed description of the arguments of the \texttt{xtail} function can be read by typing \texttt{?xtail} or \texttt{help(xtail)} at the \textbf{R} prompt.
+
+<<>>=
+test.results <- xtail(mrna,rpf,condition,bins=1000)
+@
+
+
+Now we can examine the first five lines of the results produced by the `xtail' run.
+
+<<inspectData,echo=TRUE>>=
+head(test.results,5)
+@
+
+The results of fist pipline are named with suffix "\_v1", which are generated by comparing with mRNA and RPF log2 fold change: The element \verb'log2FC_TE_v1' represents the log2 fold change of TE; \verb"OVL_v1" is overlap coefficience, which quantify the statistical confidence of difference between two distributions, here is difference of log2 fold change of mRNA and RPF. The \verb"pvalue_v1" represent statistical significance. The sencond pipline are named with suffix "\_v2", which are derived from comparing log2 ratios between two conditions: \verb'log2FC_TE_v2',  \verb'OVL_v2', and \verb'pvalue_v2' are log2 ratio of TE, overlap coefficience, and pvalues. Finally, the more conserved results (with larger-Pvalue) was select as the final assessment of differential translation, which are named with suffix "\_final". The \verb'pvalue.adjust' is the estimated false discovery rate corresponding to the \verb'pvalue_final'. The \verb'CI' is the credible interval of \verb'log2FC_TE_final' (95\% by default), and which could be changed by setting \verb'ci' in \verb'xtail' function.
+
+Finally, the plain-text file of the results can be exported using the base \textbf{R} functions \textsl{write.csv} or \textsl{write.table}.
+
+<<writeResult,eval=FALSE>>=
+write.table(test.results,"test_results.txt",quote=F,sep="\t")
+@
+
+
+\section*{Session Info}
+
+<<sessInfo>>=
+sessionInfo()
+@
+
+
+
+\begin{thebibliography}{99}
+\bibitem{DESeq2}
+Love MI, Huber W, Anders S: \textsl{Moderated Estimation of Fold Change and Dispersion for RNA-Seq Data with DESeq2}. Genome Biology 2014, 15:550.
+A Comparison of Methods: Normalizing High-Throughput RNA Sequencing Data.
+\bibitem{Reddy}
+Reddy R: \textsl{A Comparison of Methods: Normalizing High-Throughput RNA Sequencing Data. Cold Spring Harbor Labs Journals}. bioRxiv 2015:1-9.
+\bibitem{PC3}
+Hsieh AC, Liu Y, Edlind MP, et al.: \textsl{The translational landscape of mTOR signaling steers cancer initiation and metastasis}. Nature 2012, 485:55-61.
+\end{thebibliography}
+
+\end{document}
+

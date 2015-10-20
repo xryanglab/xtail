@@ -3,7 +3,7 @@ Genome-wide assessment of differential translations with ribosome profiling data
 
 ###VERSION
 
-1.0
+1.1.2
 
 ###Authors
 
@@ -15,7 +15,7 @@ The purpose of this package is to discover the genes undergoing differential tra
 							
 ###REQUIREMENTS
 * R >= 3.0
-* DESeq >= 1.6.3
+* DESeq2
 * Rcpp >= 0.10.1
 * parallel 
 

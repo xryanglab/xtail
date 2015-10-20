@@ -1,5 +1,0 @@
-import(parallel)
-import(DESeq2)
-import(Rcpp)
-export(xtail)
-useDynLib(xtail)

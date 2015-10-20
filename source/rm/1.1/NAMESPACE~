@@ -1,7 +1,0 @@
-import(parallel)
-import(DESeq2)
-import(BiocGenerics)
-import(Rcpp)
-export(doTest)
-export(xtail)
-useDynLib(xtail)
