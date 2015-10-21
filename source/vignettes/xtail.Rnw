@@ -36,7 +36,8 @@ concordance=TRUE
 \maketitle
 \section{Introduction}
 
-This package, Xtail, is for identification of genes undergoing differential translation across two conditions with ribosome profiling data. Xtail is based on a simple assumption that if a gene is subjected to translational dyresgulation under certain exprimental or physiological condition, the change of its RPF abundance should be discoordinated with that of mRNA expression. Specifically, \verb'Xtail' consists of three major steps: (1) modeling of ribosome profiling data using negative binomial distribution (NB), (2) estabilishment of probability distributions for fold changes of mRNA or RPF (or RPF-to mRNA ratios), and (3) evaluation of statistical significance and magnitude of differential translations. The differential translation of each gene is evaluated by two pipelines: one is difference between log2 fold changes (log2FC) of mRNA and RPF across two condition, another one is difference between log2 ratios (log2R) of RPF over mRNA in two conditions. \verb'Xtail' derives a discrete probability distribution of log2FC for either mRNA and RPF, and a discrete distribution of log2R in each of the two conditions. In one of the two parallel analysis pipelines, by multiplying the probability density distribution of log2FC for mRNA and RPF, Xtail generates a joint probability matrix. The P-values of differential translation are calculated by taking summation of the elements in the upper or lower triangle, whichever the smaller of the matrix, multipled by 2. And the credible intervals of the translational difference is derived so that the probability of being above the upper bound is the same as that of being below the lower bound (equal-tailed). Xtail also return an optional value, OVL, to quantify the statistical confidence of translational difference by measuring the overlap of two log2FC distributions of RPF and mRNA. Small OVL suggests differential translation of the gene. The second analysis pipeline was implemented in \verb'Xtail' to generate another joint probability matrix by multiplying the two probability distribution of log2R in the two conditions. Following the same procedure as described above for the comparison of log2FC,  the P-values, credible intervals, and OVL are obtained. Finally, these two parallel pipelines generate two sets of results, each of which includes P-value, point estimate and credible interval of differential translation. The more conserved on (with larger P-value) was selected as the final assessment of different translation.
+This package, Xtail, is for identification of genes undergoing differential translation across two conditions with ribosome profiling data. Xtail is based on a simple assumption that if a gene is subjected to translational dyresgulation under certain exprimental or physiological condition, the change of its RPF abundance should be discoordinated with that of mRNA expression. Specifically, \verb'Xtail' consists of three major steps: (1) modeling of ribosome profiling data using negative binomial distribution (NB), (2) estabilishment of probability distributions for fold changes of mRNA or RPF (or RPF-to mRNA ratios), and (3) evaluation of statistical significance and magnitude of differential translations. The differential translation of each gene is evaluated by two pipelines:
+in the first one, \verb'Xtail' calculated the posterior probabilities for a range of mRNA or RPF fold changes, and eventually estabilished their probability distributions. These two distributions, represented as probability vectors, were then used to estabilish a joint probability distribution matrix, from which a new probability distribution were generated for differential translation. The P-values, point estimates and credible intervals of differential tranlsations were then calculated based on these results. In the other parallel pipline, \verb'Xtail' established probability distributions for RPF-to-mRNA ratios in two conditions and derived another distribution for differential translation. The more conserved set of results from these two parallel piplines was used as the final result. With this strategy, \verb'Xtail' performs quantification of differential translation for each gene, i.e., the extent to which a gene's translational rate is not coordinated with the change of the mRNA expression.
 
 By default, \verb'Xtail' adapts the strategy of DESeq2 [1] to normalize read counts of mRNA and RPF in all samples, and fits NB distributions with dispersions $\alpha$ and $\mu$.
 
@@ -44,22 +45,15 @@ This guide provides step-by-step instructions on how to load data, how to excute
 \newpage
 \section{Data Preparation}
 
-As input, the \verb'Xtail' package uses read counts of RPF and mRNA, in the form of rectangular table of values. The rows and columns of the table correspond the genes and samples. Each cell in the \textsl{g-th} row and the \textsl{i-th} columns is the count number of reads mapped to gene \textsl{g} in sample \textsl{i}. The mRNA count data and RPF count data are stored in two text files.We can read them in using \textbf{R}'s standard function. For example,
-
-<<readData,eval=FALSE>>=
-mrna <- read.table("mRNA_counts.txt", header=TRUE, row.names=1)
-rpf <- read.table("RPF_counts.txt", header=TRUE, row.names=1)
-@
-
-Here, header=TRUE indicates that the first line contains columns names and row.names=1 means that the first column should be used as row names (gene names or gene ID).
+The \verb'Xtail' package uses read counts of RPF and mRNA, in the form of rectangular table of values. The rows and columns of the table represent the genes and samples, respectively. Each cell in the \textsl{g-th} row and the \textsl{i-th} columns is the count number of reads mapped to gene \textsl{g} in sample \textsl{i}.
 
 Xtail takes in raw read counts of RPF and mRNA, and performs median-of-ratios normalization by default. This normalization method is also recommend by Reddy R. [2]. Alternatively, users can provide normalized read counts and skip the built-in normalization in Xtail.
 
-In this vignette, we select a published ribosome profiling dataset from human prostate cancer cell PC3 after mTOR signaling inhibition with PP242 [3]. This dataset consist of 11391 genes from two conditions ("treatment" vs. "control") with each condition having two replicates.
+In this vignette, we select a published ribosome profiling dataset from human prostate cancer cell PC3 after mTOR signaling inhibition with PP242 [3]. This dataset consists of mRNA and RPF data for 11391 genes in two replicates from each of the two conditions("treatment" vs. "control").
 
 \section{An Example}
 
-Here we perform an analysis on the ribosome profiling data described above. First we load the library and data.
+Here we run \verb'Xtail' with the ribosome profiling data described above. First we load the library and data.
 
 <<begain,results="hold",message=FALSE>>=
 library(xtail)
@@ -77,14 +71,14 @@ head(rpf,5)
 @
 
 
-We assign condition labels corresponding to the columns of the mRNA and RPF inputs.
+We assign condition labels to the columns of the mRNA and RPF data.
 
 <<>>=
 condition <- c("control","control","treat","treat")
 @
 
 
-Next, we run the main function, \Rfunction{xtail()}. By default, the second condition (here is "treat") would be compared against the first condition (here is "control"). Those genes with the minimum average expression of mRNA counts and RPF counts acrossing all conditions larger than 1 are used (can be changed by set \verb'minMeanCount'). All the available CPU cores are used for running program. The argument \verb`"bins"` is the number of bins used for calculating the probability densities of log2FC and log2R. This paramater will determine how accurate the final pvalue. Here, in order to keep the run-time of this vignette small, we will set \verb'bins' to "1000". Detailed description of the arguments of the \texttt{xtail} function can be read by typing \texttt{?xtail} or \texttt{help(xtail)} at the \textbf{R} prompt.
+Next, we run the main function, \Rfunction{xtail()}. By default, the second condition (here is "treat") would be compared against the first condition (here is "control"). Those genes with the minimum average expression of mRNA counts and RPF counts among all samples larger than 1 are used (can be changed by setting \verb'minMeanCount'). All the available CPU cores are used for running program. The argument \verb`"bins"` is the number of bins used for calculating the probability densities of log2FC and log2R. This paramater will determine accuracy of the final pvalue. Here, in order to keep the run-time of this vignette short, we will set \verb'bins' to "1000". Detailed description of the arguments of the \texttt{xtail} function can be found by typing \texttt{?xtail} or \texttt{help(xtail)} at the \textbf{R} prompt.
 
 <<>>=
 test.results <- xtail(mrna,rpf,condition,bins=1000)
@@ -97,9 +91,9 @@ Now we can examine the first five lines of the results produced by the `xtail' r
 head(test.results,5)
 @
 
-The results of fist pipline are named with suffix "\_v1", which are generated by comparing with mRNA and RPF log2 fold change: The element \verb'log2FC_TE_v1' represents the log2 fold change of TE; \verb"OVL_v1" is overlap coefficience, which quantify the statistical confidence of difference between two distributions, here is difference of log2 fold change of mRNA and RPF. The \verb"pvalue_v1" represent statistical significance. The sencond pipline are named with suffix "\_v2", which are derived from comparing log2 ratios between two conditions: \verb'log2FC_TE_v2',  \verb'OVL_v2', and \verb'pvalue_v2' are log2 ratio of TE, overlap coefficience, and pvalues. Finally, the more conserved results (with larger-Pvalue) was select as the final assessment of differential translation, which are named with suffix "\_final". The \verb'pvalue.adjust' is the estimated false discovery rate corresponding to the \verb'pvalue_final'. The \verb'CI' is the credible interval of \verb'log2FC_TE_final' (95\% by default), and which could be changed by setting \verb'ci' in \verb'xtail' function.
+The results of fist pipline are named with suffix "\_v1", which are generated by comparing mRNA and RPF log2 fold changes: The element \verb'log2FC_TE_v1' represents the log2 fold change of TE; \verb"OVL_v1" is overlap coefficience, which quantify the statistical confidence of difference between two distributions, here is difference of log2 fold change of mRNA and RPF. The \verb"pvalue_v1" represent statistical significance. The sencond pipline are named with suffix "\_v2", which are derived by comparing log2 ratios between two conditions: \verb'log2FC_TE_v2',  \verb'OVL_v2', and \verb'pvalue_v2' are log2 ratio of TE, overlap coefficience, and pvalues. Finally, the more conserved results (with larger-Pvalue) was select as the final assessment of differential translation, which are named with suffix "\_final". The \verb'pvalue.adjust' is the estimated false discovery rate corresponding to the \verb'pvalue_final'. The \verb'CI' is the credible interval of \verb'log2FC_TE_final' (95\% by default), and the level of confidence can be changed by setting \verb'ci' in \verb'xtail' function.
 
-Finally, the plain-text file of the results can be exported using the base \textbf{R} functions \textsl{write.csv} or \textsl{write.table}.
+Finally, the plain-text file of the results can be exported using the functions \textsl{write.csv} or \textsl{write.table}.
 
 <<writeResult,eval=FALSE>>=
 write.table(test.results,"test_results.txt",quote=F,sep="\t")
