@@ -11,7 +11,7 @@ Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
 
 ###DESCRIPTION
 
-The purpose of this package is to discover the genes undergoing differential translation across two different experiment conditions using both RNA-seq data and ribosom profiling data.
+The purpose of this package is to identify the genes undergoing differential translation across two conditions with ribosome profiling data.
 							
 ###REQUIREMENTS
 * R >= 3.0
@@ -25,12 +25,13 @@ To install Xtail, please refer to INSTALL file in this directory.
 
 ###CONTENTS
 
-All relevant scripts for Xtail are located in the subdirectory source.        
-The R install packages are located in the subdirectory packages.
+All relevant scripts for Xtail are located in the subdirectory "source".        
+The R install packages are located in the subdirectory "packages".
 
 ###DOCUMENTATION
 
-To use Xtail, please refer to the instructions in xtail.pdf in this subdirectory source/inst/doc.
+To use Xtail, please refer to the instructions in xtail.pdf in this subdirectory source/inst/doc,
+or type: vignette("xtail") at the R-prompt.
 
 ###LICENSE
 
