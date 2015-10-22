@@ -14,7 +14,7 @@ Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
 The purpose of this package is to identify the genes undergoing differential translation across two conditions with ribosome profiling data.
 							
 ###REQUIREMENTS
-* R >= 3.0
+* R >= 3.2
 * DESeq2
 * Rcpp >= 0.10.1
 * parallel 
