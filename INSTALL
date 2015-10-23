@@ -5,10 +5,9 @@
 
 * Users should install DESeq2 before using Xtail:
 start R and enter:
-<pre>
 source("https://bioconductor.org/biocLite.R")
 biocLite("DESeq2")
-</pre>
+
 
 Then, users can install Xtail from source package or binary package:
 * Install from source package
