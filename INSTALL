@@ -3,6 +3,13 @@
 2. Start the R program; 
 3. As a first step with R, start the R help browser by typing help.start() in the R command window. For help on any function, e.g. the “mean” function, type ? mean.
 
+* Users should install DESeq2 before using Xtail:
+start R and enter:
+<pre>
+source("https://bioconductor.org/biocLite.R")
+biocLite("DESeq2")
+</pre>
+
 Then, users can install Xtail from source package or binary package:
 * Install from source package
 Download the source package from "packages" directory, e.g. xtail_1.1.2-source.tar.gz;
