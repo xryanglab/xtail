@@ -3,7 +3,7 @@ Genome-wide assessment of differential translations with ribosome profiling data
 
 ###VERSION
 
-1.1.2
+1.1.3
 
 ###Authors
 
