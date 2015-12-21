@@ -1,7 +1,7 @@
 Package: xtail
 Type: Package
 Title: Genome-wide assessment of differential translations with ribosome profiling data
-Version: 1.1.2
+Version: 1.1.3
 Date: 2015-08-10
 Author: Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
 Maintainer: Zhengtao Xiao <xzt13@mails.tsinghua.edu.cn>
