@@ -21,10 +21,6 @@ boundFC <- function(k1, alpha1, intercept1, sf1, FC1, cond1, k2, alpha2, interce
     .Call('xtail_boundFC', PACKAGE = 'xtail', k1, alpha1, intercept1, sf1, FC1, cond1, k2, alpha2, intercept2, sf2, FC2, cond2, stepFC, toleration)
 }
 
-overlapCoef <- function(a, b) {
-    .Call('xtail_overlapCoef', PACKAGE = 'xtail', a, b)
-}
-
 xtail_test <- function(k1, k2, ints1, ints2, log2FC_1, log2FC_2, disper1, disper2, sf1, sf2, cond1, cond2, bin, ci) {
     .Call('xtail_xtail_test', PACKAGE = 'xtail', k1, k2, ints1, ints2, log2FC_1, log2FC_2, disper1, disper2, sf1, sf2, cond1, cond2, bin, ci)
 }

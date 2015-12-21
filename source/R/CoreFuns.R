@@ -531,3 +531,36 @@ estimateSizeFactorsForMatrix <- function( counts, locfunc = stats::median, geoMe
   }
   sf
 }
+
+xtailDispersionFit <- function(rawmeans, rawdisps, quantilePercent=0.35, binnum=50, minDisp=1e-8){
+  useForFit <- rawdisps > 100 * minDisp
+  if(sum(useForFit) == 0){
+    return (rawdisps)
+    stop("all gene-wise dispersion estimates are within 2 orders of magnitude
+    from the minimum value, and so the gene-wise estimates as final estimates.")
+  }
+  usedMeans <- rawmeans[useForFit]
+  usedDisps <- rawdisps[useForFit]
+  sortMeans <- usedMeans[order(usedMeans)]
+  sortDisps <- usedDisps[order(usedMeans)]
+  genenum <- length(sortMeans)
+  quantile_means <- c()
+  quantile_disps <- c()
+  for(i in seq(1,genenum,binnum)){
+    num = min(binnum,genenum-i+1)
+    if(num<(binnum)){
+      next
+    }
+    curbin_means <- sortMeans[i:(i+num-1)]
+    curbin_disps <- sortDisps[i:(i+num-1)]
+
+    m <- curbin_means[order(curbin_disps)][1:floor(num*quantilePercent)]
+    d <- curbin_disps[order(curbin_disps)][1:floor(num*quantilePercent)]
+    quantile_means <- c(quantile_means, m)
+    quantile_disps <- c(quantile_disps, d)
+  }
+  dat <- data.frame(logDisps = log(quantile_disps), logMeans=log(quantile_means))
+  fit <- locfit(logDisps~logMeans, data=dat[quantile_disps>=minDisp*10,,drop=FALSE])
+  dispFit <- function(rawmeans)exp(predict(fit,data.frame(logMeans=log(rawmeans))))
+  dispFit
+}

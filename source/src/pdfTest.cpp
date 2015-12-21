@@ -321,18 +321,7 @@ NumericVector boundFC(NumericVector k1, NumericVector alpha1, NumericVector inte
     return ret;
 }
 
-// [[Rcpp::export]]
-NumericVector overlapCoef(NumericVector a, NumericVector b){
-    double asum = 0.0;
-    double minSum = 0.0;
-    for (int i = 0; i < a.size(); i++){
-        minSum += min(a[i], b[i]);
-        asum += a[i];
-    }
-    NumericVector ret(1);
-    ret[0] = minSum / asum;
-    return ret;
-}
+
 
 
 // [[Rcpp::export]]
@@ -342,13 +331,12 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
     NumericVector cond2, IntegerVector bin, NumericVector ci){
 
 
-    NumericVector ret(5); // deltaTE, OVL, pval, ci_low, ci_high
+    NumericVector ret(4); // deltaTE,  pval, ci_low, ci_high
     if (isnan(log2FC_1[0]) || isnan(log2FC_2[0])){
         ret[1] = NA_REAL;
         ret[0] = NA_REAL;
         ret[2] = NA_REAL;
         ret[3] = NA_REAL;
-        ret[4] = NA_REAL;
         return ret;
     }
 
@@ -366,8 +354,6 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
     }
     NumericVector log2_density1 = probDensity(k1, disper1, ints1, sf1, betas, cond1);
     NumericVector log2_density2 = probDensity(k2, disper2, ints2, sf2, betas, cond2);
-    NumericVector ovl = overlapCoef(log2_density1, log2_density2);
-    ret[1] = ovl[0];
 
     NumericVector side(1);
     side[0] = log2FC_1[0] - log2FC_2[0];
@@ -379,9 +365,9 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
         }else{
             ret[0] = betas[-retValues[0]] - betas[0];
         }
-        ret[2] = retValues[1];
+        ret[1] = retValues[1];
+        ret[2] = 0;
         ret[3] = 0;
-        ret[4] = 0;
 
     }else{
 
@@ -396,7 +382,7 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
         }else{
             ret[0] = betas[-retValues[0]] - betas[0];
         }
-        ret[2] = retValues[1];
+        ret[1] = retValues[1];
         //lowCI = retValues[2];
         //highCI = retValues[3];
         // lowCI       
@@ -411,8 +397,8 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
             lowCI = betas[-retValues[3]] - betas[0];
         }
 
-        ret[3] = min(lowCI,highCI);
-        ret[4] = max(lowCI,highCI);
+        ret[2] = min(lowCI,highCI);
+        ret[3] = max(lowCI,highCI);
     }
     return ret;
 }

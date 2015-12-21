@@ -1,4 +1,5 @@
 import(parallel)
+import(locfit)
 import(DESeq2)
 importFrom(genefilter,rowVars)
 import(Rcpp)

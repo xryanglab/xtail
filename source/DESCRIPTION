@@ -8,7 +8,7 @@ Maintainer: Zhengtao Xiao <xzt13@mails.tsinghua.edu.cn>
 Description: The purpose of this package is to discover the genes undergoing differential translation across two different experiment conditions
 							using both RNA-seq data and ribosom profiling data.
 VignetteBuilder: knitr
-Depends: DESeq2, R(>=3.2)
+Depends: DESeq2
 Imports: parallel, Rcpp (>= 0.10.1), genefilter
 Suggests: knitr, BiocStyle
 LinkingTo: Rcpp, RcppArmadillo

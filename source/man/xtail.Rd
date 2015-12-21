@@ -8,17 +8,17 @@ A tool to quantitatively assess differential translations with ribosome profilin
 By pairwise comparisons of ribosome profiling data, Xtail identifies differentially translated genes across two experimental or physiological conditions.
 }
 \usage{
-xtail(mrna,rpf,condition,baseLevel=NA,minMeanCount=1,ci=0.95,...)
+xtail(mrna,rpf,condition,baseLevel=NA,minMeanCount=1,...)
 }
 \arguments{
   \item{mrna}{a matrix or data frame of raw mRNA count data whose rows correspond to genes and columns correspond to samples. The column names should be non-empty, and in same order with condition.}
   \item{rpf}{a matrix or data frame of raw RPF count data whose rows correspond to genes and columns correspond to samples.The column names should be non-empty, and in same order with condition.}
   \item{condition}{condition labels corresponding to the order of samples in mrna and rpf. There must be exactly two unique values.}
   \item{baseLevel}{The baseLevel indicates which one of the two conditions will be compared against by the other one. If not specified, \code{Xtail} will return results of comparing the second condition over the first one.}
-  \item{minMeanCount}{\code{Xtail} uses the average expression level of each gene, across all samples as filter criterion and omits all genes with mean counts below minMeanCount.}
-  \item{ci}{The level of confindence to get credible intervals of log2 fold change of translational efficiency (TE), by default 95\%.}
+  \item{minMeanCount}{\code{Xtail} uses the average expression level of each gene, across all samples as filter criterion and it omits all genes with mean counts below minMeanCount.}
+  \item{ci}{The level of confindence to get credible intervals of log2 fold change of translational efficiency (TE), for example 0.95.}
   \item{normalize}{Whether normalization should be done (TRUE \\ FALSE). If missing, \code{Xtail} will perform median-of-ratios normlazation by default.}
-  \item{method.adjust}{The method to use for adjusting multiple comparisons, see \code{?p.adjust} }
+  \item{method.adjust}{The method to use for adjusting multiple comparisons, by default "BH",  see \code{?p.adjust} }
   \item{threads}{The number of CPU cores used. By default, all available  cores are used.}
   \item{bins}{The number of bins used for calculating the probability density of log2FC or log2R (default is 10000). This paramater will determine accuracy of pvalue. Set it small for a very quick test run.}
 }

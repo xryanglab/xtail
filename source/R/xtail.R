@@ -31,8 +31,8 @@ xTest <- function(object1, object2,threads,bins,baseLevel, ci){
 	clusterExport(cluster, c('counts1','counts2','intercept1','intercept2','log2Ratio1','log2Ratio2','dispersion1','dispersion2','sizefactor1','sizefactor2','cond1','cond2','bins','ci'),envir=environment())
 	res <- clusterMap(cluster, xTestWrapper, i = c(1:rowNo));
 	stopCluster(cluster)
-	res <- matrix(unlist(res),ncol=5,byrow=T,dimnames=list(intersect.genes, c("deltaTE","OVL","Pval","lowci","highci")))
-	res 
+	res <- matrix(unlist(res),ncol=4,byrow=T,dimnames=list(intersect.genes, c("deltaTE","Pval","lowci","highci")))
+	res
 }
 
 
@@ -54,20 +54,32 @@ estimateFun <- function(countData, condition, baseLevel, libsize, dispers){
 	}
 
 	# estimateDispersion
-	if (missing(dispers)){
-		dataSet <- suppressMessages(estimateDispersions(dataSet))
-		dispersionMatrix(dataSet) <- matrix(rep(dispersions(dataSet), ncol(dataSet)),ncol=ncol(dataSet), byrow=FALSE)
+	if (missing(dispers))
+	{
+		if (ncol(countData) == 2){
+			object = dataSet #creat a copy of a dataSet for estimating dispersion
+			design(object) = formula(~1) # take two conditon samples as replicates for estimating dispersion
+			object = estimateDispersionsGeneEst(object)
+			#fit
+			dispFitFun <- xtailDispersionFit(mcols(object)$baseMean, mcols(object)$dispGeneEst)
+			#attr(dispFitFun, "fitType") = "bin quantile"
+			fittedDisps <- dispFitFun(mcols(object)$baseMean)
+			dispersionMatrix(dataSet) = matrix(rep(fittedDisps, ncol(dataSet)), ncol=ncol(dataSet), byrow=FALSE)
+		}else{
+			dataSet <- suppressMessages(estimateDispersions(dataSet))
+			dispersionMatrix(dataSet) <- matrix(rep(dispersions(dataSet), ncol(dataSet)),ncol=ncol(dataSet), byrow=FALSE)
+		}
 	}else{
 		dispersionMatrix(dataSet) <- dispers
 	}
 
 	# estimate log2FC or log2R
-	dataSet <- suppressMessages(estimateMLEForBeta(dataSet, modelMatrixType="standard"))	
+	dataSet <- suppressMessages(estimateMLEForBeta(dataSet, modelMatrixType="standard"))
 	dataSet
 }
 
 #' @export
-xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, ci = 0.95, normalize = TRUE, method.adjust="BH", threads=NA,bins=10000)
+xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normalize = TRUE, method.adjust="BH", threads=NA,bins=10000,ci = 0)
 {
 	## default baseLevel is the first coniditon
 	if (is.na(baseLevel)) {baseLevel <- condition[1]}
@@ -111,6 +123,8 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, ci = 0
 	}
 
 	## 1. Estimate the difference of log2FC between mRNA and RPF
+	#If no replicate, we assume no more than one-third of genes' expression changed.
+	#so only ... were used for fit dispersion.
 	message ("1. Estimate the log2 fold change in mrna")
 	mrna_object = estimateFun(mrna,condition,baseLevel,mrna_sizeFactor)
 	message ("2. Estimate the log2 fold change in rpf")
@@ -118,14 +132,14 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, ci = 0
 	message ("3. Estimate the difference between two log2 fold changes")
 	result_log2FC = xTest(mrna_object,rpf_object,threads,bins,baseLevel,ci)
 
-	### 2. Estimate the difference of log2R between control and treatment 
+	### 2. Estimate the difference of log2R between control and treatment
 	condition1_mrna <- mrna[,condition==baseLevel,drop=FALSE]
 	condition1_rpf <- rpf[,condition==baseLevel,drop=FALSE]
 	condition2_mrna <- mrna[,condition!=baseLevel,drop=FALSE]
 	condition2_rpf <- rpf[,condition!=baseLevel,drop=FALSE]
 	condition1_counts <- cbind(condition1_mrna,condition1_rpf)
 	condition2_counts <- cbind(condition2_mrna,condition2_rpf)
-	
+
 	condition1_sizeFactor <- c(mrna_sizeFactor[condition==baseLevel],rpf_sizeFactor[condition==baseLevel])
 	condition2_sizeFactor <- c(mrna_sizeFactor[condition!=baseLevel],rpf_sizeFactor[condition!=baseLevel])
 	condition1_disper <- cbind(dispersionMatrix(mrna_object)[,1:ncol(condition1_mrna),drop=FALSE], dispersionMatrix(rpf_object)[,1:ncol(condition1_rpf),drop=FALSE])
@@ -137,7 +151,7 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, ci = 0
 	message ("5. Estimate the log2 ratio in second condition")
 	condition2_object <- estimateFun(condition2_counts,condition,baseLevel,condition2_sizeFactor,condition2_disper)
 	message ("6. Estimate the difference between two log2 ratios")
-	result_log2R = xTest(condition1_object,condition2_object,threads,bins,baseLevel,ci)	
+	result_log2R = xTest(condition1_object,condition2_object,threads,bins,baseLevel,ci)
 
 	## 3. combine the log2FC and log2R results and report
 	###!!!!
@@ -145,38 +159,42 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, ci = 0
 	result_log2R <- result_log2R[intersect.genes,]
 	result_log2FC <- result_log2FC[intersect.genes,]
 
-	##!!!return ("deltaTE","OVL","Pval","lowci","highci")
-	final_result <- cbind(result_log2FC[,1:3],result_log2R[,1:3])
-	colnames(final_result) <- c("log2FC_TE_v1","OVL_v1","pvalue_v1","log2FC_TE_v2","OVL_v2","pvalue_v2")
+	##!!!return ("deltaTE","Pval","lowci","highci")
+	final_result <- cbind(result_log2FC[,1:2],result_log2R[,1:2])
+	colnames(final_result) <- c("log2FC_TE_v1","pvalue_v1","log2FC_TE_v2","pvalue_v2")
 	final_result <- as.data.frame(final_result)
-	
-	final_result$OVL_final <- rep(0,nrow(final_result))
+
 	final_result$pvalue_final <- rep(0,nrow(final_result))
 	final_result$pvalue.adjust <- rep(0,nrow(final_result))
 	final_result$log2FC_TE_final <- rep(0,nrow(final_result))
 	final_result_CI <- rep(0,nrow(final_result))
+	log2FC_determine <- 0
+	log2R_determine <- 0
 	for (i in 1:nrow(final_result)){
-		if (is.na(final_result[i,3]) || is.na(final_result[i,6])){
-			final_result$OVL_final[i] <- NA
+		if (is.na(final_result[i,2]) || is.na(final_result[i,4])){
 			final_result$pvalue_final[i] <- NA
 			final_result$log2FC_TE_final[i] <- NA
 			final_result_CI[i] <- NA
-		}else if(final_result[i,3] > final_result[i,6]){
-			final_result$OVL_final[i] <- final_result[i,2]
-			final_result$pvalue_final[i] <- final_result[i,3]
+		}else if(final_result[i,2] > final_result[i,4]){
+			final_result$pvalue_final[i] <- final_result[i,2]
 			final_result$log2FC_TE_final[i] <- final_result[i,1]
-			final_result_CI[i] <- paste0("[",round(result_log2FC[i,4],2),",",round(result_log2FC[i,5],2),"]")
+			final_result_CI[i] <- paste0("[",round(result_log2FC[i,3],2),",",round(result_log2FC[i,4],2),"]")
+			log2FC_determine <- log2FC_determine + 1
 		}else{
-			final_result$OVL_final[i] <- final_result[i,5]
-			final_result$pvalue_final[i] <- final_result[i,6]
-			final_result$log2FC_TE_final[i] <- final_result[i,4]
-			final_result_CI[i] <- paste0("[",round(result_log2R[i,4],2),",",round(result_log2R[i,5],2),"]")
+			final_result$pvalue_final[i] <- final_result[i,4]
+			final_result$log2FC_TE_final[i] <- final_result[i,3]
+			final_result_CI[i] <- paste0("[",round(result_log2R[i,3],2),",",round(result_log2R[i,4],2),"]")
+			log2R_determine <- log2R_determine + 1
 		}
-	} 
+	}
 	final_result$pvalue.adjust = p.adjust(final_result$pvalue_final,method=method.adjust)
 	if (ci>0){
 		CI_string = paste0("CI(",100*ci,"%)")
 		final_result[[CI_string]] = final_result_CI
 	}
+	message("Number of times the log2FC and log2R used in determining the final p-value")
+	message(paste0(" log2FC: ", log2FC_determine))
+	message(paste0(" log2R: ", log2R_determine))
+
 	final_result
 }

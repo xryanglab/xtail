@@ -93,18 +93,6 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// overlapCoef
-NumericVector overlapCoef(NumericVector a, NumericVector b);
-RcppExport SEXP xtail_overlapCoef(SEXP aSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< NumericVector >::type a(aSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type b(bSEXP);
-    __result = Rcpp::wrap(overlapCoef(a, b));
-    return __result;
-END_RCPP
-}
 // xtail_test
 NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1, NumericVector ints2, NumericVector log2FC_1, NumericVector log2FC_2, NumericVector disper1, NumericVector disper2, NumericVector sf1, NumericVector sf2, NumericVector cond1, NumericVector cond2, IntegerVector bin, NumericVector ci);
 RcppExport SEXP xtail_xtail_test(SEXP k1SEXP, SEXP k2SEXP, SEXP ints1SEXP, SEXP ints2SEXP, SEXP log2FC_1SEXP, SEXP log2FC_2SEXP, SEXP disper1SEXP, SEXP disper2SEXP, SEXP sf1SEXP, SEXP sf2SEXP, SEXP cond1SEXP, SEXP cond2SEXP, SEXP binSEXP, SEXP ciSEXP) {
