@@ -11,3 +11,4 @@ src/*.dll
 inst/.DS_Store
 inst/._.DS_Store
 inst/._doc
+xtail.Rproj
