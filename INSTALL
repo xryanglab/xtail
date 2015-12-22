@@ -19,6 +19,6 @@ For Linux or Mac:
 install.package("xtail_1.1.3-source.tar.gz")
 
 *  Installing from binary package (recommended)
-Download the binary package from "packages" directory, e.g. xtail_1.1.3-windows.tar.gz; 
+Download the binary package from "packages" directory, e.g. xtail_1.1.3-win.tar.gz; 
 For Windows and Mac OS X, users can install Xtail using R's package installer
 For linux, type the following in an R command window: install.package("xtail_1.1.3-linux.tar.gz")
