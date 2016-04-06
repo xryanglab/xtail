@@ -16,7 +16,7 @@ For Windows:
 Before install, you need install "Rtools", "MainGW";     
 Then using the following command to install: install.packages("xtail_1.1.3-source.tar.gz",repo=NULL,type="source")
 For Linux or Mac:
-install.package("xtail_1.1.3-source.tar.gz")
+install.packages("xtail_1.1.3-source.tar.gz")
 
 *  Installing from binary package (recommended)
 Download the binary package from "packages" directory, e.g. xtail_1.1.3.zip; 
