@@ -25,8 +25,7 @@ To install Xtail, please refer to INSTALL file in this directory.
 
 ###CONTENTS
 
-All relevant scripts for Xtail are located in the subdirectory "source".        
-The R install packages are located in the subdirectory "packages".
+The R install packages are located in the "releases" tag.
 
 ###DOCUMENTATION
 
