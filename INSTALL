@@ -11,14 +11,16 @@ biocLite("DESeq2")
 
 Then, users can install Xtail from source package or binary package:
 * Install from source package
-Download the source package from "packages" directory, e.g. xtail_1.1.3-source.tar.gz;
+Download the source package from "releases" , e.g. xtail_1.1.3-source.tar.gz;
 For Windows:
 Before install, you need install "Rtools", "MainGW";     
 Then using the following command to install: install.packages("xtail_1.1.3-source.tar.gz",repo=NULL,type="source")
+Or, you can install directly from the github: install.packages("https://github.com/xryanglab/xtail/releases/download/v1.1.3/xtail_1.1.3-source.tar.gz",type="source")
 For Linux or Mac:
-install.packages("xtail_1.1.3-source.tar.gz")
+install.packages("xtail_1.1.3-source.tar.gz"), or install.packages("https://github.com/xryanglab/xtail/releases/download/v1.1.3/xtail_1.1.3-source.tar.gz")
+
 
 *  Installing from binary package (recommended)
-Download the binary package from "packages" directory, e.g. xtail_1.1.3.zip; 
+Download the binary package from "release", e.g. xtail_1.1.3.zip; 
 For Windows and Mac OS X, users can install Xtail using R's package installer;
-For linux, type the following in an R command window: install.package("xtail_1.1.3.tar.gz")
+For linux, type the following in an R command window: install.packages("xtail_1.1.3.tar.gz"), or install.packages("https://github.com/xryanglab/xtail/releases/download/v1.1.3/xtail_1.1.3.tar.gz")
