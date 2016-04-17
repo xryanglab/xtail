@@ -108,6 +108,7 @@ Rcpp::NumericVector probMatrix(Rcpp::NumericVector x, Rcpp::NumericVector y, Rcp
                 pmax = drecord;
                 pmaxi = k;
             }
+            s += drecord;
         }
         ret[0] = pmaxi;
         if (s>0.5){
