@@ -1,6 +1,11 @@
 # History files
 .Rhistory
 .Rapp.history
+.Rbuildignore
+data/.directory
+inst/doc/.directory
+inst/doc/.gitignore
+
 
 # Example code in package build process
 *-Ex.R
