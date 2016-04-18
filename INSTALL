@@ -20,6 +20,11 @@ install.packages("xtail_1.1.3-source.tar.gz")
 Please make sure that the working directory is the same as the downloading directory , or use the full path, for example,
 install.packages("/Users/username/xtail_1.1.3-source.tar.gz")
 
+Users can also install "xtail" directly from github:
+  install.packages("devtools")
+  library("devtools")
+  install_github("xryanglab/xtail")
+
 
 *  Installing from binary package (recommended)
 Download the binary package from "releases", e.g. xtail_1.1.3.zip; 
