@@ -1,4 +1,4 @@
-CHANGES IN VERSION 0.0.2
+CHANGES IN VERSION 1.1.3
 ------------------------
-=> add credible interval 
-=> add different dispersion in estimating log2R
+=> add credible interval. 
+=> bug fixed, see issues #2.
