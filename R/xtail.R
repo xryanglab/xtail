@@ -124,7 +124,6 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normal
 
 	## 1. Estimate the difference of log2FC between mRNA and RPF
 	#If no replicate, we assume no more than one-third of genes' expression changed.
-	#so only ... were used for fit dispersion.
 	message ("1. Estimate the log2 fold change in mrna")
 	mrna_object = estimateFun(mrna,condition,baseLevel,mrna_sizeFactor)
 	message ("2. Estimate the log2 fold change in rpf")
@@ -144,12 +143,15 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normal
 	condition2_sizeFactor <- c(mrna_sizeFactor[condition!=baseLevel],rpf_sizeFactor[condition!=baseLevel])
 	condition1_disper <- cbind(dispersionMatrix(mrna_object)[,1:ncol(condition1_mrna),drop=FALSE], dispersionMatrix(rpf_object)[,1:ncol(condition1_rpf),drop=FALSE])
 	condition2_disper <- cbind(dispersionMatrix(mrna_object)[,(ncol(condition1_mrna)+1):ncol(mrna),drop=FALSE], dispersionMatrix(rpf_object)[,(ncol(condition1_rpf)+1):ncol(rpf),drop=FALSE])
-
+	condition1 <- c(paste0(condition[condition == baseLevel],"_mRNA"), paste0(condition[condition == baseLevel],"_rpf"))
+	baseLevel1 <- paste0(baseLevel,"_mRNA")
+	condition2 <- c(paste0(condition[condition != baseLevel],"_mRNA"), paste0(condition[condition != baseLevel],"_rpf"))
+	baseLevel2 <- paste0(unique(condition)[2],"_mRNA")
 	#
 	message ("4. Estimate the log2 ratio in first condition")
-	condition1_object <- estimateFun(condition1_counts,condition,baseLevel,condition1_sizeFactor,condition1_disper)
+	condition1_object <- estimateFun(condition1_counts,condition1,baseLevel1,condition1_sizeFactor,condition1_disper)
 	message ("5. Estimate the log2 ratio in second condition")
-	condition2_object <- estimateFun(condition2_counts,condition,baseLevel,condition2_sizeFactor,condition2_disper)
+	condition2_object <- estimateFun(condition2_counts,condition2,baseLevel2,condition2_sizeFactor,condition2_disper)
 	message ("6. Estimate the difference between two log2 ratios")
 	result_log2R = xTest(condition1_object,condition2_object,threads,bins,baseLevel,ci)
 
