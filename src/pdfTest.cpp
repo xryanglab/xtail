@@ -84,7 +84,7 @@ Rcpp::NumericVector probMatrix(Rcpp::NumericVector x, Rcpp::NumericVector y, Rcp
             int j=k;
             int i=0;
             drecord = 0;
-            while(j<=y.size()){
+            while(j<y.size()){
                 drecord += x[i]*y[j];
                 ++j;
                 ++i;
@@ -204,7 +204,7 @@ NumericVector probMatrixCI(NumericVector x, NumericVector y, NumericVector side,
             int j=k;
             int i=0;
             drecord = 0;
-            while(j<=y.size()){
+            while(j<y.size()){
                 drecord += x[i]*y[j];
                 ++j;
                 ++i;
