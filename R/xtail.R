@@ -32,6 +32,9 @@ xTest <- function(object1, object2,threads,bins,baseLevel, ci){
 	res <- clusterMap(cluster, xTestWrapper, i = c(1:rowNo));
 	stopCluster(cluster)
 	res <- matrix(unlist(res),ncol=4,byrow=T,dimnames=list(intersect.genes, c("deltaTE","Pval","lowci","highci")))
+	res <- data.frame(res)
+	res$log2Ratio1 <- log2Ratio1
+	res$log2Ratio2 <- log2Ratio2
 	res
 }
 
@@ -79,7 +82,7 @@ estimateFun <- function(countData, condition, baseLevel, libsize, dispers){
 }
 
 #' @export
-xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normalize = TRUE, method.adjust="BH", threads=NA,bins=10000,ci = 0)
+xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normalize = TRUE, p.adjust.method ="BH", threads=NA,bins=10000,ci = 0)
 {
 	## default baseLevel is the first coniditon
 	if (is.na(baseLevel)) {baseLevel <- condition[1]}
@@ -93,6 +96,10 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normal
 	if (length(unique(condition))!=2) stop("There must be exactly two different conditions")
 	## check confidence interval
 	if (ci<0 ) stop("ci must be non-negative")
+	## check pvalue.adjust method
+	supported.padj <- c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY","fdr")
+	if (!is.element(p.adjust.method, supported.padj)) stop(paste0("The adjustment methods must be one of ",paste(supported.padj,collapse=", ")))
+
 	## filter genes with low count number
 	if (minMeanCount<1) stop("minMeanCount needs to be at least 1")
 	keep.genes <- rowMeans(mrna) >= minMeanCount
@@ -156,47 +163,54 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normal
 	result_log2R = xTest(condition1_object,condition2_object,threads,bins,baseLevel,ci)
 
 	## 3. combine the log2FC and log2R results and report
-	###!!!!
+
 	intersect.genes <- intersect(rownames(result_log2FC), rownames(result_log2R))
 	result_log2R <- result_log2R[intersect.genes,]
 	result_log2FC <- result_log2FC[intersect.genes,]
 
-	##!!!return ("deltaTE","Pval","lowci","highci")
-	final_result <- cbind(result_log2FC[,1:2],result_log2R[,1:2])
-	colnames(final_result) <- c("log2FC_TE_v1","pvalue_v1","log2FC_TE_v2","pvalue_v2")
+	#result data frame
+	condition1_TE <- paste0(baseLevel,"_log2TE")
+	condition2_TE <- paste0(unique(condition)[2], "_log2TE")
+	final_result <- cbind(result_log2R[,c("log2Ratio1","log2Ratio2","deltaTE","Pval")],result_log2FC[,c("log2Ratio1","log2Ratio2","deltaTE","Pval")])
+	colnames(final_result) <- c("mRNA_log2FC","RPF_log2FC","log2FC_TE_v1","pvalue_v1",condition1_TE,condition2_TE,"log2FC_TE_v2","pvalue_v2")
 	final_result <- as.data.frame(final_result)
-
-	final_result$pvalue_final <- rep(0,nrow(final_result))
-	final_result$pvalue.adjust <- rep(0,nrow(final_result))
-	final_result$log2FC_TE_final <- rep(0,nrow(final_result))
-	final_result_CI <- rep(0,nrow(final_result))
-	log2FC_determine <- 0
-	log2R_determine <- 0
+	final_result$log2FC_TE_final <- 0
+	final_result$pvalue_final <- 0
+	final_result$pvalue.adjust <- 0
+	if (ci>0){
+		resultCI <- NA
+	}
+	log2FC_determine_num <- 0
+	log2R_determine_num <- 0
 	for (i in 1:nrow(final_result)){
-		if (is.na(final_result[i,2]) || is.na(final_result[i,4])){
-			final_result$pvalue_final[i] <- NA
-			final_result$log2FC_TE_final[i] <- NA
-			final_result_CI[i] <- NA
-		}else if(final_result[i,2] > final_result[i,4]){
-			final_result$pvalue_final[i] <- final_result[i,2]
-			final_result$log2FC_TE_final[i] <- final_result[i,1]
-			final_result_CI[i] <- paste0("[",round(result_log2FC[i,3],2),",",round(result_log2FC[i,4],2),"]")
-			log2FC_determine <- log2FC_determine + 1
+		if (is.na(final_result[i,"pvalue_v1"]) || is.na(final_result[i,"pvalue_v2"])){
+		  final_result$log2FC_TE_final[i] <- NA
+		  final_result$pvalue_final[i] <- NA
+			if (ci>0) resultCI[i] <- NA
+		}else if(final_result[i,"pvalue_v1"] > final_result[i,"pvalue_v2"]){
+		  final_result$log2FC_TE_final[i] <- final_result[i,"log2FC_TE_v1"]
+			final_result$pvalue_final[i] <- final_result[i,"pvalue_v1"]
+			if (ci>0) resultCI[i] <- paste0("[",round(result_log2FC[i,"lowci"],2),",",round(result_log2FC[i,"highci"],2),"]")
+			log2FC_determine_num <- log2FC_determine_num + 1
 		}else{
-			final_result$pvalue_final[i] <- final_result[i,4]
-			final_result$log2FC_TE_final[i] <- final_result[i,3]
-			final_result_CI[i] <- paste0("[",round(result_log2R[i,3],2),",",round(result_log2R[i,4],2),"]")
-			log2R_determine <- log2R_determine + 1
+		  final_result$log2FC_TE_final[i] <- final_result[i,"log2FC_TE_v2"]
+		  final_result$pvalue_final[i] <- final_result[i,"pvalue_v2"]
+			if (ci>0) resultCI[i] <- paste0("[",round(result_log2R[i,"lowci"],2),",",round(result_log2R[i,"highci"],2),"]")
+			log2R_determine_num <- log2R_determine_num + 1
 		}
 	}
-	final_result$pvalue.adjust = p.adjust(final_result$pvalue_final,method=method.adjust)
+
+	final_result$pvalue.adjust = p.adjust(final_result$pvalue_final,method=p.adjust.method)
 	if (ci>0){
 		CI_string = paste0("CI(",100*ci,"%)")
-		final_result[[CI_string]] = final_result_CI
+		final_result[[CI_string]] = resultCI
 	}
-	message("Number of times the log2FC and log2R used in determining the final p-value")
-	message(paste0(" log2FC: ", log2FC_determine))
-	message(paste0(" log2R: ", log2R_determine))
-
-	final_result
+	message("Number of the log2FC and log2R used in determining the final p-value")
+	message(paste0(" log2FC: ", log2FC_determine_num))
+	message(paste0(" log2R: ", log2R_determine_num))
+	xtail_results <- list(resultsTable = final_result, log2FC_determine_num = log2FC_determine_num,
+						log2R_determine_num=log2R_determine_num,condition1=baseLevel,
+						condition2=unique(condition)[2] )
+	class(xtail_results) <- c("xtailResults","list")
+	xtail_results
 }

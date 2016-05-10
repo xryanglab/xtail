@@ -1,0 +1,14 @@
+citEntry(entry="article",
+         title = "Genome-wide assessment of differential translations with ribosome profiling data",
+         author = personList( as.person("Zhengtao Xiao"),
+                              as.person("Qin Zou"),
+                              as.person("Yu Liu"),
+                              as.person("Xuerui Yang")),
+         year = 2016,
+         journal = "Nat Commun",
+         doi = "10.1038/ncomms11194",
+         volume = 7,
+         pages = 11194,
+         url = "http://www.ncbi.nlm.nih.gov/pubmed/27041671",
+         textVersion = "Xiao Z, Zou Q, Liu Y, Yang X. 'Genome-wide assessment of differential translations with ribosome profiling data'. Nat Commun. 2016 Apr 4;7:11194. PMID:27041671"
+)
