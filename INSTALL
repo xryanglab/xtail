@@ -22,9 +22,11 @@ Please make sure that the working directory is the same as the downloading direc
 install.packages("/Users/username/xtail_1.1.4-source.tar.gz")
 
 Users can also install "xtail" directly from github:
-  install.packages("devtools")
-  library("devtools")
-  install_github("xryanglab/xtail")
+  
+    install.packages("devtools")
+    library("devtools")
+    install_github("xryanglab/xtail")
+
 
 
 *  Installing from binary package (recommended)
