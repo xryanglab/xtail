@@ -32,7 +32,7 @@ The R install packages are located in the "releases" tag.
 
 # DOCUMENTATION
 
-To use Xtail, please refer to the instructions in xtail.pdf in this subdirectory source/inst/doc,
+To use Xtail, please refer to the instructions in xtail.pdf in this subdirectory inst/doc,
 or type: vignette("xtail") at the R-prompt.
 
 # LICENSE
