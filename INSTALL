@@ -13,12 +13,18 @@ Then, users can install Xtail from source package or binary package:
 Download the source package from "releases" , e.g. xtail_1.1.5-source.tar.gz;
 For Windows:
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+>>>>>>> development
 Before install, you need install "Rtools", "MainGW";
 Then using the following command to install: install.packages("xtail_1.1.5-source.tar.gz",repo=NULL,type="source")
 For Linux or Mac:
 install.packages("xtail_1.1.5-source.tar.gz")
+=======
+<<<<<<< HEAD
+>>>>>>> development
 =======
 >>>>>>> development
 Before install, you need install "Rtools", "MainGW";     
@@ -27,6 +33,10 @@ install.packages("xtail_1.1.4-source.tar.gz",repo=NULL,type="source")
 For Linux or Mac:install.packages("xtail_1.1.4-source.tar.gz")
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> master
+>>>>>>> development
 =======
 >>>>>>> master
 >>>>>>> development
@@ -55,6 +65,10 @@ Please make sure that the working directory is the same as the downloading direc
 install.packages("/Users/username/xtail_1.1.4-source.tar.gz")
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> master
+>>>>>>> development
 =======
 >>>>>>> master
 >>>>>>> development
