@@ -1,9 +1,21 @@
+CHANGES IN VERSION 1.1.5
+************************
+=> add citations for xtail.
+=> add summary() function
+=> add resultsTable() function
+=> add write.xtail() function
+=> add plotFCs() function
+=> add volcanoPlot() function
+
 CHANGES IN VERSION 1.1.4
+************************
 => support for different number of replicates in each condition.
 
 
 CHANGES IN VERSION 1.1.3
+************************
 ------------------------
-=> add credible interval. 
+=> add credible interval.
 => bug fixed, see issues #2.
+=> official version
 

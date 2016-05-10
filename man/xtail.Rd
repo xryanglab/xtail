@@ -32,6 +32,7 @@ xtail(mrna,rpf,condition,baseLevel=NA,minMeanCount=1,...)
   The step of estimation of the probability distributions, for log2FC or log2R, will execute slowly in the current implementation, but can be speeded up by running on multiple cores using the parallel library. By default, the "detectCores" function in parallel library is used to determine the number of CPU cores in the machine on which R is running. To adjust the number of cores used, use "threads" argument to assign.
 }
 \examples{
+  #load the data
   data(xtaildata)
   #Get the mrna count data and rpf count data
   test.mrna <- xtaildata$mrna
@@ -40,8 +41,6 @@ xtail(mrna,rpf,condition,baseLevel=NA,minMeanCount=1,...)
   condition <- c("control","control","treat","treat")
   #run xtail
   test.results <- xtail(test.mrna,test.rpf,condition)
-  #save the results
-  write.table(test.results,"test_results.txt",quote=F,sep="\t")
 }
 \author{
 Zhengtao xiao

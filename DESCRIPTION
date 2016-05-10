@@ -2,10 +2,10 @@ Package: xtail
 Type: Package
 Title: Genome-wide assessment of differential translations with
         ribosome profiling data
-Version: 1.1.4
-Date: 2016-04-21
+Version: 1.1.5
+Date: 2016-05
 Author: Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
-Maintainer: Zhengtao Xiao <xzt13@mails.tsinghua.edu.cn>
+Maintainer: Zhengtao Xiao <xzt13@mails.tsinghua.edu.cn>; Rongyao Huang <THUhry12@163.com>
 Description: The purpose of this package is to discover the genes undergoing differential translation across two different experiment conditions
 							using both RNA-seq data and ribosom profiling data.
 VignetteBuilder: knitr
@@ -16,4 +16,4 @@ LinkingTo: Rcpp, RcppArmadillo
 License: GPL (>= 3)
 URL: https://github.com/xryanglab/xtail
 NeedsCompilation: yes
-Packaged: 2016-04-21 09:52:24 UTC; xzt
+Packaged: 2016-05
