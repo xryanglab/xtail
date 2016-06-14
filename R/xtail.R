@@ -171,7 +171,7 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normal
 	#result data frame
 	condition1_TE <- paste0(baseLevel,"_log2TE")
 	condition2_TE <- paste0(unique(condition)[2], "_log2TE")
-	final_result <- cbind(result_log2R[,c("log2Ratio1","log2Ratio2","deltaTE","Pval")],result_log2FC[,c("log2Ratio1","log2Ratio2","deltaTE","Pval")])
+	final_result <- cbind(result_log2FC[,c("log2Ratio1","log2Ratio2","deltaTE","Pval")],result_log2R[,c("log2Ratio1","log2Ratio2","deltaTE","Pval")])
 	colnames(final_result) <- c("mRNA_log2FC","RPF_log2FC","log2FC_TE_v1","pvalue_v1",condition1_TE,condition2_TE,"log2FC_TE_v2","pvalue_v2")
 	final_result <- as.data.frame(final_result)
 	final_result$log2FC_TE_final <- 0
