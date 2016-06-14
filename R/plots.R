@@ -60,7 +60,7 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 	variable <- which(abs(resultsTable$mRNA_log2FC - resultsTable$RPF_log2FC) <= log2FC.cutoff |
 				(abs(resultsTable$mRNA_log2FC) < log2FC.cutoff & abs(resultsTable$RPF_log2FC) < log2FC.cutoff))
 	plot(resultsTable$mRNA_log2FC[variable],resultsTable$RPF_log2FC[variable],pch=pch,col="gray90",
-		xlim=xlim,xlab = "mRNA log2FC", ylab="RPF log2FC",frame.plot=TRUE,cex=cex,
+		xlim=xlim,ylim=ylim,xlab = "mRNA log2FC", ylab="RPF log2FC",frame.plot=TRUE,cex=cex,
 		cex.lab=cex.lab, cex.axis=cex.axis, cex.main=cex.main, cex.sub=cex.sub, ...)
 
 	#mRNA change, RPF stable.
