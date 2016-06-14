@@ -18,3 +18,7 @@ setGeneric("plotFCs", function(object,...) standardGeneric("plotFCs"))
 #' @rdname vocanoPlot
 #' @export
 setGeneric("volcanoPlot", function(object,...) standardGeneric("volcanoPlot"))
+
+#' @rdname xtailResults
+#' @export
+setClass("xtailResults")

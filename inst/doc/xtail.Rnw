@@ -163,6 +163,29 @@ plotFCs(test.results)
 Those genes in which the difference of \verb'mRNA_log2FC' and \verb'RPF_log2FC' did not exceed more than \verb'log2FC.cutoff' are excluded. The points will be color-coded with the \verb'pvalue_final' obtained with \verb'xtail' (more significant p values having darker color). By default the \verb'log2FC.cutoff' is 1.
 
 
+\subsection{plotRs}
+
+Similar to \Rfunction{plotFCs}, the function \Rfunction{plotRs} shows the RPF-to-mRNA ratios in two conditions, where the position of each gene is determined by its RPF-to-mRNA ratio (log2R) in two conditions, represented on the x-axis and y-axis respectively (Figure \ref{fig:plotRs}). The optional input parameter \verb'log2R.cutoff' (non-negative threshold value) will divide the genes into different classes:
+\begin{itemize}
+ \item \verb'blue': for genes whoes \verb'log2R' larger in first condition than second condition.
+ \item \verb'red': for genes whoes \verb'log2R' larger in second condition than the first condition.
+ \item \verb'green': for genes whoes \verb'log2R' changing homodirectionally in two condition.
+ \item \verb'yellow': for genes whoes \verb'log2R' changing antidirectionally in two conditon.
+\end{itemize}
+
+<<plotRs,fig.width=5.5, fig.height=5.5>>=
+plotRs(test.results)
+@
+\begin{figure}[h]
+\centering
+\includegraphics[width=.5\textwidth]{figure/plotRs-1}
+\caption{Scatter plot of log2 RPF-to-mRNA ratios}
+\label{fig:plotRs}
+\end{figure}
+
+Those genes in which the difference of \verb'log2R' in two conditions did not exceed more than \verb'log2R.cutoff' are excluded. The points will be color-coded with the \verb'pvalue_final' obtained with \verb'xtail' (more significant p values having darker color). By default the \verb'log2R.cutoff' is 1.
+
+
 \subsection{volcanoPlot}
 
 It can also be useful to evaluate the fold changes cutoff and p values thresholds by looking at the volcano plot. A simple function for making this plot is \Rfunction{volcanoPlot}, in which the \verb'log2FC_TE_final' is plotted on the x-axis and the negative log10 \verb'pvalue_fianl' is plotted on the y-axis (Figure \ref{fig:volcanoplot}).

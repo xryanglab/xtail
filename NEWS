@@ -5,6 +5,7 @@ CHANGES IN VERSION 1.1.5
 => add resultsTable() function
 => add write.xtail() function
 => add plotFCs() function
+=> add plotRs() function
 => add volcanoPlot() function
 
 CHANGES IN VERSION 1.1.4
