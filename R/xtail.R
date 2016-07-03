@@ -148,8 +148,9 @@ xtail <- function(mrna, rpf, condition, baseLevel = NA, minMeanCount = 1, normal
 
 	condition1_sizeFactor <- c(mrna_sizeFactor[condition==baseLevel],rpf_sizeFactor[condition==baseLevel])
 	condition2_sizeFactor <- c(mrna_sizeFactor[condition!=baseLevel],rpf_sizeFactor[condition!=baseLevel])
-	condition1_disper <- cbind(dispersionMatrix(mrna_object)[,1:ncol(condition1_mrna),drop=FALSE], dispersionMatrix(rpf_object)[,1:ncol(condition1_rpf),drop=FALSE])
-	condition2_disper <- cbind(dispersionMatrix(mrna_object)[,(ncol(condition1_mrna)+1):ncol(mrna),drop=FALSE], dispersionMatrix(rpf_object)[,(ncol(condition1_rpf)+1):ncol(rpf),drop=FALSE])
+
+	condition1_disper <- cbind(dispersionMatrix(mrna_object)[,condition==baseLevel,drop=FALSE], dispersionMatrix(rpf_object)[,condition==baseLevel,drop=FALSE])
+	condition2_disper <- cbind(dispersionMatrix(mrna_object)[,condition!=baseLevel,drop=FALSE], dispersionMatrix(rpf_object)[,condition!=baseLevel,drop=FALSE])
 	condition1 <- c(paste0(condition[condition == baseLevel],"_mRNA"), paste0(condition[condition == baseLevel],"_rpf"))
 	baseLevel1 <- paste0(baseLevel,"_mRNA")
 	condition2 <- c(paste0(condition[condition != baseLevel],"_mRNA"), paste0(condition[condition != baseLevel],"_rpf"))
