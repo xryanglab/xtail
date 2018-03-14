@@ -39,6 +39,7 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 	resultsTable <- resultsTable[complete.cases(resultsTable),]
 	resultsTable <- resultsTable[order(resultsTable$pvalue_final, decreasing = TRUE),]
 	resultsTable$colorscale <- rescale(-log10(resultsTable$pvalue_final))
+	resultsTable$category <- NA
 
 	if (missing(xlim)){
 		xmin <- min(resultsTable$mRNA_log2FC,na.rm=T) - 0.1
@@ -62,6 +63,7 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 	plot(resultsTable$mRNA_log2FC[variable],resultsTable$RPF_log2FC[variable],pch=pch,col="gray90",
 		xlim=xlim,ylim=ylim,xlab = "mRNA log2FC", ylab="RPF log2FC",frame.plot=TRUE,cex=cex,
 		cex.lab=cex.lab, cex.axis=cex.axis, cex.main=cex.main, cex.sub=cex.sub, ...)
+	resultsTable$category[variable] <- "stable"
 
 	#mRNA change, RPF stable.
 	variable <- which( abs(resultsTable$mRNA_log2FC) >= log2FC.cutoff &
@@ -72,6 +74,7 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 		pch=pch,col=alpha(colornames,0.8),cex=cex)
 	leg <- "transcription only"
 	leg.col <- "#0D5FFF"
+	resultsTable$category[variable] <- "transcription_only"
 
 	#mRNA stable, RPF change.
 	variable <- which( abs(resultsTable$mRNA_log2FC) < log2FC.cutoff &
@@ -81,6 +84,7 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 	points(resultsTable$mRNA_log2FC[variable],resultsTable$RPF_log2FC[variable],pch=pch,col=alpha(colornames,0.8),cex=cex)
 	leg <- c(leg, "translation only")
 	leg.col <- c(leg.col, "#FF2E06")
+	resultsTable$category[variable] <- "translation_only"
 
 	#mRNA change, RPF change, homodirectional.
 	variable <- which( sign(resultsTable$mRNA_log2FC) * sign(resultsTable$RPF_log2FC) > 0 &
@@ -91,6 +95,7 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 	points(resultsTable$mRNA_log2FC[variable],resultsTable$RPF_log2FC[variable],pch=pch,col=alpha(colornames,0.8),cex=cex)
 	leg <- c(leg, "homodirectional")
 	leg.col <- c(leg.col, "#75E805")
+	resultsTable$category[variable] <- "homodirectional"
 
 	#mRNA change, RPF change, opposite change.
 	variable <- which( sign(resultsTable$mRNA_log2FC) * sign(resultsTable$RPF_log2FC) < 0 &
@@ -101,6 +106,7 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 	points(resultsTable$mRNA_log2FC[variable],resultsTable$RPF_log2FC[variable],pch=pch,col=alpha(colornames,0.8),cex=cex)
 	leg <- c(leg, "opposite change")
 	leg.col <- c(leg.col, "#FFDE13")
+	resultsTable$category[variable] <- "opposite_change"
 
 	abline(h= log2FC.cutoff, lty=2, col="gray")
 	abline(v= log2FC.cutoff, lty=2, col="gray")
@@ -108,6 +114,9 @@ plotFCs <- function(object, log2FC.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, 
 	abline(v= -log2FC.cutoff, lty=2, col="gray")
 
 	legend("bottomright", legend=leg,pch=pch, col=leg.col, bty="n",cex=cex)
+
+	object$resultsTable <- resultsTable
+	object
 }
 
 
@@ -150,6 +159,7 @@ plotRs <- function(object, log2R.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, ce
   resultsTable <- resultsTable[complete.cases(resultsTable),]
   resultsTable <- resultsTable[order(resultsTable$pvalue_final, decreasing = TRUE),]
   resultsTable$colorscale <- rescale(-log10(resultsTable$pvalue_final))
+  resultsTable$category <- NA
 
   condition1_TE <- paste0(object$condition1,"_log2TE")
   condition2_TE <- paste0(object$condition2, "_log2TE")
@@ -176,6 +186,7 @@ plotRs <- function(object, log2R.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, ce
   plot(resultsTable[[condition1_TE]][variable],resultsTable[[condition2_TE]][variable],pch=pch,col="gray90",
        xlim=xlim,ylim=ylim,xlab = paste0(object$condition1," log2Rs"), ylab=paste0(object$condition2," log2Rs"),frame.plot=TRUE,cex=cex,
        cex.lab=cex.lab, cex.axis=cex.axis, cex.main=cex.main, cex.sub=cex.sub, ...)
+  resultsTable$category[variable] <- "stable"
 
   #change, stable.
   variable <- which( abs(resultsTable[[condition1_TE]]) >= log2R.cutoff &
@@ -186,6 +197,7 @@ plotRs <- function(object, log2R.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, ce
          pch=pch,col=alpha(colornames,0.8),cex=cex)
   leg <- paste0(object$condition1," only")
   leg.col <- "#0D5FFF"
+  resultsTable$category[variable] <- paste0(object$condition1,"_only")
 
   # stable, change.
   variable <- which( abs(resultsTable[[condition1_TE]]) < log2R.cutoff &
@@ -195,6 +207,7 @@ plotRs <- function(object, log2R.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, ce
   points(resultsTable[[condition1_TE]][variable],resultsTable[[condition2_TE]][variable],pch=pch,col=alpha(colornames,0.8),cex=cex)
   leg <- c(leg, paste0(object$condition2," only"))
   leg.col <- c(leg.col, "#FF2E06")
+  resultsTable$category[variable] <- paste0(object$condition2,"_only")
 
   # both change, homodirectional.
   variable <- which( sign(resultsTable[[condition1_TE]]) * sign(resultsTable[[condition2_TE]]) > 0 &
@@ -205,6 +218,7 @@ plotRs <- function(object, log2R.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, ce
   points(resultsTable[[condition1_TE]][variable],resultsTable[[condition2_TE]][variable],pch=pch,col=alpha(colornames,0.8),cex=cex)
   leg <- c(leg, "homodirectional")
   leg.col <- c(leg.col, "#75E805")
+  resultsTable$category[variable] <- "homodirectional"
 
   # opposite change.
   variable <- which( sign(resultsTable[[condition1_TE]]) * sign(resultsTable[[condition2_TE]]) < 0 &
@@ -215,6 +229,7 @@ plotRs <- function(object, log2R.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, ce
   points(resultsTable[[condition1_TE]][variable],resultsTable[[condition2_TE]][variable],pch=pch,col=alpha(colornames,0.8),cex=cex)
   leg <- c(leg, "opposite change")
   leg.col <- c(leg.col, "#FFDE13")
+  resultsTable$category[variable] <- "opposite_change"
 
   abline(h= log2R.cutoff, lty=2, col="gray")
   abline(v= log2R.cutoff, lty=2, col="gray")
@@ -222,6 +237,9 @@ plotRs <- function(object, log2R.cutoff = 1, cex=1, xlim, ylim, ..., cex.lab, ce
   abline(v= -log2R.cutoff, lty=2, col="gray")
 
   legend("bottomright", legend=leg,pch=pch, col=leg.col, bty="n",cex=cex)
+
+  object$resultsTable <- resultsTable
+  object
 }
 
 #' volcano plot

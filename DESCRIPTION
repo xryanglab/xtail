@@ -5,7 +5,7 @@ Title: Genome-wide assessment of differential translations with
 Version: 1.1.5
 Date: 2016-05
 Author: Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
-Maintainer: Zhengtao Xiao <xzt13@mails.tsinghua.edu.cn>; Rongyao Huang <THUhry12@163.com>
+Maintainer: Zhengtao Xiao <xzt13[at]tsinghua.org.cn>; Rongyao Huang <THUhry12[at]163.com>
 Description: The purpose of this package is to discover the genes undergoing differential translation across two different experiment conditions
 							using both RNA-seq data and ribosom profiling data.
 VignetteBuilder: knitr

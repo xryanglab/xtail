@@ -14,7 +14,7 @@ Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
 # DESCRIPTION
 
 The purpose of this package is to identify the genes undergoing differential translation across two conditions with ribosome profiling data.
-							
+​							
 # REQUIREMENTS
 
 * R >= 3.2
@@ -40,7 +40,7 @@ or type: vignette("xtail") at the R-prompt.
 Xtail is licensed under the GPL version 3 or any later version
 
 
-For more information please contact xzt13@mails.tsinghua.edu.cn and THUhry12@163.com
+For more information please contact  xzt13[at]tsinghua.org.cn and THUhry12[at]163.com
 
 
 

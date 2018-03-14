@@ -1,3 +1,5 @@
+print.xtailResults <- function(){print ("xtailResults")}
+
 dispersionMatrix.DESeqDataSet <- function(object){
   if (!"dispersionMatrix" %in% names(assays(object))) return (NULL)
   disp <- assays(object)[["dispersionMatrix"]]
