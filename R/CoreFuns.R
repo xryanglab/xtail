@@ -12,10 +12,10 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
     stop("testing requires dispersionMatrix estimates, first call estimateDispersions()")
   }
   stopifnot(length(maxit)==1)
-  
+
   # in case the class of the mcols(mcols(object)) are not character
   object <- sanitizeRowData(object)
-  
+
   if (is.null(mcols(object)$allZero)) {
     object <- getBaseMeansAndVariances(object)
   }
@@ -54,8 +54,8 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
 
   # store mu in case the user did not call estimateDispersionsGeneEst
   dimnames(fit$mu) <- NULL
-  assays(objectNZ)[["mu"]] <- fit$mu
-  assays(object)[["mu"]] <- buildMatrixWithNARows(fit$mu, mcols(object)$allZero)
+  assay(objectNZ,"mu",withDimnames = FALSE) <- fit$mu
+  assay(object,"mu",withDimnames = FALSE) <- buildMatrixWithNARows(fit$mu, mcols(object)$allZero)
 
   # store the prior variance directly as an attribute
   # of the DESeqDataSet object, so it can be pulled later by
@@ -76,15 +76,15 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
     if (!quiet) message(paste(sum(!betaConv),"rows did not converge in beta, labelled in mcols(object)$betaConv. Use larger maxit argument"))
   }
 
-  
+
   resultsList <- c(matrixToList(betaMatrix),
                    matrixToList(betaSE),
                    list(betaConv = betaConv,
                         betaIter = fit$betaIter,
                         deviance = -2 * fit$logLike))
-  
+
   Results <- buildDataFrameWithNARows(resultsList, mcols(object)$allZero)
-  
+
   modelMatrixNamesSpaces <- gsub("_"," ",modelMatrixNames)
 
   lfcType <- "MLE"
@@ -96,7 +96,7 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
                                     "convergence of betas",
                                     "iterations for betas",
                                     "deviance for the fitted model"))
- 
+
   mcols(object) <- cbind(mcols(object),Results)
   return(object)
 }
@@ -149,7 +149,7 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
   modelMatrixNames <- colnames(modelMatrix)
   modelMatrixNames[modelMatrixNames == "(Intercept)"] <- "Intercept"
   modelMatrixNames <- make.names(modelMatrixNames)
-  
+
   if (renameCols) {
     convertNames <- renameModelMatrixColumns(colData(object),
                                              modelFormula)
@@ -157,14 +157,14 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
     modelMatrixNames[match(convertNames$from, modelMatrixNames)] <- convertNames$to
   }
   colnames(modelMatrix) <- modelMatrixNames
-  
+
   normalizationFactors <- if (!is.null(normalizationFactors(object))) {
     normalizationFactors(object)
-  } else { 
+  } else {
     matrix(rep(sizeFactors(object),each=nrow(object)),
            ncol=ncol(object))
   }
-  
+
   if (missing(alpha_hat)) {
     alpha_hat <- dispersionMatrix(object)
   }
@@ -177,7 +177,7 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
   if (missing(lambda)) {
     lambda <- rep(1e-6, ncol(modelMatrix))
   }
-  
+
   # bypass the beta fitting if the model formula is only intercept and
   # the prior variance is large (1e6)
   # i.e., LRT with reduced ~ 1 and no beta prior
@@ -199,16 +199,16 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
       w <- (mu^-1 + alpha)^-1
       xtwx <- rowSums(w)
       sigma <- xtwx^-1
-      betaSE <- matrix(log2(exp(1)) * sqrt(sigma),ncol=1)      
+      betaSE <- matrix(log2(exp(1)) * sqrt(sigma),ncol=1)
       hat_diagonals <- w * xtwx^-1;
       res <- list(logLike = logLike, betaConv = betaConv, betaMatrix = betaMatrix,
                   betaSE = betaSE, mu = mu, betaIter = betaIter,
                   deviance = deviance,
-                  modelMatrix=modelMatrix, 
+                  modelMatrix=modelMatrix,
                   nterms=1, hat_diagonals=hat_diagonals)
       return(res)
   }
-  
+
   qrx <- qr(modelMatrix)
   # if full rank, estimate initial betas for IRLS below
   if (qrx$rank == ncol(modelMatrix)) {
@@ -226,7 +226,7 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
       beta_mat <- matrix(1, ncol=ncol(modelMatrix), nrow=nrow(object))
     }
   }
-  
+
   # here we convert from the log2 scale of the betas
   # and the beta prior variance to the log scale
   # used in fitBeta.
@@ -250,10 +250,10 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
 
   # test for positive variances
   rowVarPositive <- apply(betaRes$beta_var_mat,1,function(row) sum(row <= 0)) == 0
-  
+
   # test for convergence, stability and positive variances
   betaConv <- betaRes$iter < maxit
-  
+
   # here we transform the betaMatrix and betaSE to a log2 scale
   betaMatrix <- log2(exp(1))*betaRes$beta_mat
   colnames(betaMatrix) <- modelMatrixNames
@@ -269,11 +269,11 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
   } else {
     which(!rowStable | !rowVarPositive)
   }
-  
+
   if (forceOptim) {
     rowsForOptim <- seq_along(betaConv)
   }
-  
+
   if (length(rowsForOptim) > 0) {
     # we use optim if didn't reach convergence with the IRLS code
     resOptim <- fitNbinomGLMsOptim(object,modelMatrix,lambda,
@@ -292,11 +292,11 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
   stopifnot(!any(is.na(betaSE)))
   nNonposVar <- sum(rowSums(betaSE == 0) > 0)
   if (warnNonposVar & nNonposVar > 0) warning(nNonposVar,"rows had non-positive estimates of variance for coefficients")
-  
+
   list(logLike = logLike, betaConv = betaConv, betaMatrix = betaMatrix,
        betaSE = betaSE, mu = mu, betaIter = betaRes$iter,
        deviance = betaRes$deviance,
-       modelMatrix=modelMatrix, 
+       modelMatrix=modelMatrix,
        nterms=ncol(modelMatrix), hat_diagonals=betaRes$hat_diagonals)
 }
 
@@ -388,7 +388,7 @@ fitBetaWrapper <- function (ySEXP, xSEXP, nfSEXP, alpha_hatSEXP, contrastSEXP,
   na.test <- sapply(mget(arg.names), function(x) any(is.na(x)))
   if (any(na.test)) stop(paste("in call to fitBeta, the following arguments contain NA:",
                                paste(arg.names[na.test],collapse=", ")))
-  
+
   fitBeta2(ySEXP=ySEXP, xSEXP=xSEXP, nfSEXP=nfSEXP, alpha_hatSEXP=alpha_hatSEXP,
           contrastSEXP=contrastSEXP, beta_matSEXP=beta_matSEXP,
           lambdaSEXP=lambdaSEXP, tolSEXP=tolSEXP, maxitSEXP=maxitSEXP,

@@ -1,25 +1,23 @@
 print.xtailResults <- function(){print ("xtailResults")}
 
-dispersionMatrix.DESeqDataSet <- function(object){
-  if (!"dispersionMatrix" %in% names(assays(object))) return (NULL)
-  disp <- assays(object)[["dispersionMatrix"]]
-  colnames(disp) <- colnames(object)
-  disp
-}
-
 #' @export
 setMethod("dispersionMatrix", signature(object="DESeqDataSet"),
-          dispersionMatrix.DESeqDataSet)
+  function(object){
+    if (!"dispersionMatrix" %in% names(assays(object))) return (NULL)
+    disp <- assays(object)[["dispersionMatrix"]]
+    colnames(disp) <- colnames(object)
+    disp
+  }
+)
 
 #' @name dispersions
-#' @rdname dispersions
-#' @exportMethod "dispersions<-"
 setReplaceMethod("dispersionMatrix", signature(object="DESeqDataSet", value="matrix"),
-                 function(object, value) {
-                  assays(object)[["dispersionMatrix"]] <- value
-                  validObject( object )
-                  object
-                 })
+  function(object, value) {
+  assay(object,"dispersionMatrix",withDimnames = FALSE) <- value
+  validObject( object )
+  object
+  }
+)
 
 #' Summarize xtail results
 #' Print a summary of the results of xtail
@@ -120,7 +118,8 @@ resultsTable.xtailResults <- function(object,sort.by="pvalue.adjust", log2FCs = 
 #' @aliases resultsTable resultsTable.xtailResults
 #'
 #' @export
-setMethod("resultsTable", signature(object="xtailResults"),resultsTable.xtailResults)
+setMethod("resultsTable", signature(object="xtailResults"),
+          resultsTable.xtailResults)
 
 
 #' write xtail results as table

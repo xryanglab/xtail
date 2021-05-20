@@ -1,9 +1,9 @@
 
-#' @rdname dispersions2
+#' @rdname dispersions
 #' @export
 setGeneric("dispersionMatrix", function(object,...) standardGeneric("dispersionMatrix"))
 
-#' @rdname dispersions2
+#' @rdname dispersions
 #' @export
 setGeneric("dispersionMatrix<-", function(object,...,value) standardGeneric("dispersionMatrix<-"))
 
@@ -14,6 +14,10 @@ setGeneric("resultsTable", function(object,...) standardGeneric("resultsTable"))
 #' @rdname plotFCs
 #' @export
 setGeneric("plotFCs", function(object,...) standardGeneric("plotFCs"))
+
+#' @rdname plotFCs
+#' @export
+setGeneric("plotRs", function(object,...) standardGeneric("plotRs"))
 
 #' @rdname vocanoPlot
 #' @export
