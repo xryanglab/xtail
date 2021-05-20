@@ -10,6 +10,7 @@ Description:
     both RNA-seq data and ribosom profiling data.
 License:
     GPL (>= 3)
+Encoding: UTF-8
 NeedsCompilation: yes
 Depends: 
     SummarizedExperiment,
