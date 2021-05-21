@@ -6,18 +6,23 @@
 
 ## Xtail relies on DESeq2 to estimate coefficient of GLM model
 
-estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard",
-                           maxit=100, useOptim=TRUE, quiet=FALSE,useQR=TRUE) {
-  if (is.null(dispersionMatrix(object))) {
-    stop("testing requires dispersionMatrix estimates, first call estimateDispersions()")
-  }
+#' @importFrom stats relevel formula terms
+#' @importFrom S4Vectors mcols mcols<-
+#' @importFrom SummarizedExperiment assay assay<-
+.estimate_MLE_for_Beta <- function(object,
+                                   modelMatrix = NULL,
+                                   modelMatrixType = "standard",
+                                   maxit = 100,
+                                   useOptim = TRUE,
+                                   quiet = FALSE,
+                                   useQR = TRUE) {
   stopifnot(length(maxit)==1)
 
   # in case the class of the mcols(mcols(object)) are not character
-  object <- sanitizeRowData(object)
+  object <- .sanitize_rowData(object)
 
   if (is.null(mcols(object)$allZero)) {
-    object <- getBaseMeansAndVariances(object)
+    object <- .get_base_means_and_variances(object)
   }
 
   # only continue on the rows with non-zero row mean
@@ -25,7 +30,7 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
 
   if (is.null(modelMatrix)) {
     modelAsFormula <- TRUE
-    termsOrder <- attr(terms.formula(design(object)),"order")
+    termsOrder <- attr(terms(design(object)),"order")
     interactionPresent <- any(termsOrder > 1)
     blindDesign <- design(object) == formula(~ 1)
 
@@ -43,8 +48,12 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
 
   # fit the negative binomial GLM without a prior
   # (in actuality a very wide prior with standard deviation 1e3 on log2 fold changes)
-  fit <- fitNbinomGLMs(objectNZ, maxit=maxit, useOptim=useOptim, useQR=useQR,
-                       renameCols=renameCols, modelMatrix=modelMatrix)
+  fit <- .fit_Nbinom_GLMs(objectNZ,
+                          maxit = maxit,
+                          useOptim = useOptim,
+                          useQR = useQR,
+                          renameCols = renameCols,
+                          modelMatrix = modelMatrix)
   H <- fit$hat_diagonals
   modelMatrix <- fit$modelMatrix
   modelMatrixNames <- fit$modelMatrixNames
@@ -55,7 +64,7 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
   # store mu in case the user did not call estimateDispersionsGeneEst
   dimnames(fit$mu) <- NULL
   assay(objectNZ,"mu",withDimnames = FALSE) <- fit$mu
-  assay(object,"mu",withDimnames = FALSE) <- buildMatrixWithNARows(fit$mu, mcols(object)$allZero)
+  assay(object,"mu",withDimnames = FALSE) <- .build_matrix_with_NA_rows(fit$mu, mcols(object)$allZero)
 
   # store the prior variance directly as an attribute
   # of the DESeqDataSet object, so it can be pulled later by
@@ -77,13 +86,13 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
   }
 
 
-  resultsList <- c(matrixToList(betaMatrix),
-                   matrixToList(betaSE),
+  resultsList <- c(.matrix_to_list(betaMatrix),
+                   .matrix_to_list(betaSE),
                    list(betaConv = betaConv,
                         betaIter = fit$betaIter,
                         deviance = -2 * fit$logLike))
 
-  Results <- buildDataFrameWithNARows(resultsList, mcols(object)$allZero)
+  Results <- .build_DataFrame_with_NA_rows(resultsList, mcols(object)$allZero)
 
   modelMatrixNamesSpaces <- gsub("_"," ",modelMatrixNames)
 
@@ -92,14 +101,17 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
   seInfo <- paste("standard error:",modelMatrixNamesSpaces)
 
   mcols(Results) <- DataFrame(type = rep("results",ncol(Results)),
-                                  description = c(coefInfo, seInfo,
-                                    "convergence of betas",
-                                    "iterations for betas",
-                                    "deviance for the fitted model"))
+                              description = c(coefInfo, seInfo,
+                                              "convergence of betas",
+                                              "iterations for betas",
+                                              "deviance for the fitted model"))
 
   mcols(object) <- cbind(mcols(object),Results)
   return(object)
 }
+
+
+
 
 # Unexported, low-level function for fitting negative binomial GLMs
 #
@@ -129,9 +141,21 @@ estimateMLEForBeta <- function(object,modelMatrix=NULL,modelMatrixType="standard
 #
 # return a list of results, with coefficients and standard
 # errors on the log2 scale
-fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lambda,
-                          renameCols=TRUE, betaTol=1e-8, maxit=100, useOptim=TRUE,
-                          useQR=TRUE, forceOptim=FALSE, warnNonposVar=TRUE) {
+#' @importFrom stats model.matrix formula dnbinom
+#' @importFrom S4Vectors mcols
+#' @importFrom SummarizedExperiment colData assay
+.fit_Nbinom_GLMs <- function(object,
+                             modelMatrix=NULL,
+                             modelFormula,
+                             alpha_hat,
+                             lambda,
+                             renameCols = TRUE,
+                             betaTol = 1e-8,
+                             maxit = 100L,
+                             useOptim = TRUE,
+                             useQR = TRUE,
+                             forceOptim = FALSE,
+                             warnNonposVar = TRUE) {
   if (missing(modelFormula)) {
     modelFormula <- design(object)
   }
@@ -151,8 +175,8 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
   modelMatrixNames <- make.names(modelMatrixNames)
 
   if (renameCols) {
-    convertNames <- renameModelMatrixColumns(colData(object),
-                                             modelFormula)
+    convertNames <- .rename_model_matrix_columns(colData(object),
+                                                 modelFormula)
     convertNames <- convertNames[convertNames$from %in% modelMatrixNames,,drop=FALSE]
     modelMatrixNames[match(convertNames$from, modelMatrixNames)] <- convertNames$to
   }
@@ -166,7 +190,7 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
   }
 
   if (missing(alpha_hat)) {
-    alpha_hat <- dispersionMatrix(object)
+    alpha_hat <- assay(object, XTAIL_DISPERSION_ASSAY)
   }
 
   if (nrow(alpha_hat) != nrow(object)) {
@@ -187,26 +211,26 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
     ncol(modelMatrix) == 1 & all(modelMatrix == 1)
   }
   if (justIntercept & all(lambda <= 1e-6)) {
-      alpha <- alpha_hat
-      betaConv <- rep(TRUE, nrow(object))
-      betaIter <- rep(1,nrow(object))
-      betaMatrix <- matrix(log2(mcols(object)$baseMean),ncol=1)
-      mu <- normalizationFactors * as.numeric(2^betaMatrix)
-      logLike <- rowSums(dnbinom(counts(object), mu=mu, size=1/alpha, log=TRUE))
-      deviance <- -2 * logLike
-      modelMatrix <- model.matrix(~ 1, colData(object))
-      colnames(modelMatrix) <- modelMatrixNames <- "Intercept"
-      w <- (mu^-1 + alpha)^-1
-      xtwx <- rowSums(w)
-      sigma <- xtwx^-1
-      betaSE <- matrix(log2(exp(1)) * sqrt(sigma),ncol=1)
-      hat_diagonals <- w * xtwx^-1;
-      res <- list(logLike = logLike, betaConv = betaConv, betaMatrix = betaMatrix,
-                  betaSE = betaSE, mu = mu, betaIter = betaIter,
-                  deviance = deviance,
-                  modelMatrix=modelMatrix,
-                  nterms=1, hat_diagonals=hat_diagonals)
-      return(res)
+    alpha <- alpha_hat
+    betaConv <- rep(TRUE, nrow(object))
+    betaIter <- rep(1,nrow(object))
+    betaMatrix <- matrix(log2(mcols(object)$baseMean),ncol=1)
+    mu <- normalizationFactors * as.numeric(2^betaMatrix)
+    logLike <- rowSums(dnbinom(counts(object), mu=mu, size=1/alpha, log=TRUE))
+    deviance <- -2 * logLike
+    modelMatrix <- model.matrix(~ 1, colData(object))
+    colnames(modelMatrix) <- modelMatrixNames <- "Intercept"
+    w <- (mu^-1 + alpha)^-1
+    xtwx <- rowSums(w)
+    sigma <- xtwx^-1
+    betaSE <- matrix(log2(exp(1)) * sqrt(sigma),ncol=1)
+    hat_diagonals <- w * xtwx^-1;
+    res <- list(logLike = logLike, betaConv = betaConv, betaMatrix = betaMatrix,
+                betaSE = betaSE, mu = mu, betaIter = betaIter,
+                deviance = deviance,
+                modelMatrix=modelMatrix,
+                nterms=1, hat_diagonals=hat_diagonals)
+    return(res)
   }
 
   qrx <- qr(modelMatrix)
@@ -234,16 +258,20 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
   # conversion factor, log(2)
   lambdaLogScale <- lambda / log(2)^2
 
-  betaRes <- fitBetaWrapper(ySEXP = counts(object), xSEXP = modelMatrix,
-                            nfSEXP = normalizationFactors,
-                            alpha_hatSEXP = alpha_hat,
-                            beta_matSEXP = beta_mat,
-                            lambdaSEXP = lambdaLogScale,
-                            tolSEXP = betaTol, maxitSEXP = maxit,
-                            useQRSEXP=useQR)
+  betaRes <- .fit_Beta(ySEXP = counts(object),
+                       xSEXP = modelMatrix,
+                       nfSEXP = normalizationFactors,
+                       alpha_hatSEXP = alpha_hat,
+                       beta_matSEXP = beta_mat,
+                       lambdaSEXP = lambdaLogScale,
+                       tolSEXP = betaTol,
+                       maxitSEXP = maxit,
+                       useQRSEXP = useQR)
   mu <- normalizationFactors * t(exp(modelMatrix %*% t(betaRes$beta_mat)))
-  dispersionMatrix <- dispersionMatrix(object)
-  logLike <- nbinomLogLike(counts(object), mu, dispersionMatrix(object))
+  dispersionMatrix <- assay(object, XTAIL_DISPERSION_ASSAY)
+  logLike <- .get_nbinom_log_like(counts(object),
+                                  mu,
+                                  assay(object, XTAIL_DISPERSION_ASSAY))
 
   # test for stability
   rowStable <- apply(betaRes$beta_mat,1,function(row) sum(is.na(row))) == 0
@@ -276,12 +304,19 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
 
   if (length(rowsForOptim) > 0) {
     # we use optim if didn't reach convergence with the IRLS code
-    resOptim <- fitNbinomGLMsOptim(object,modelMatrix,lambda,
-                                   rowsForOptim,rowStable,
-                                   normalizationFactors,alpha_hat,
-                                   betaMatrix,betaSE,betaConv,
-                                   beta_mat,
-                                   mu,logLike)
+    resOptim <- .fit_Nbinom_GLMs_Optim(object,
+                                       modelMatrix,
+                                       lambda,
+                                       rowsForOptim,
+                                       rowStable,
+                                       normalizationFactors,
+                                       alpha_hat,
+                                       betaMatrix,
+                                       betaSE,
+                                       betaConv,
+                                       beta_mat,
+                                       mu,
+                                       logLike)
     betaMatrix <- resOptim$betaMatrix
     betaSE <- resOptim$betaSE
     betaConv <- resOptim$betaConv
@@ -301,13 +336,22 @@ fitNbinomGLMs <- function(object, modelMatrix=NULL, modelFormula, alpha_hat, lam
 }
 
 
+
 # breaking out the optim backup code from fitNbinomGLMs
-fitNbinomGLMsOptim <- function(object,modelMatrix,lambda,
-                               rowsForOptim,rowStable,
-                               normalizationFactors,alpha_hat,
-                               betaMatrix,betaSE,betaConv,
-                               beta_mat,
-                               mu,logLike) {
+#' @importFrom stats dnbinom dnorm optim
+.fit_Nbinom_GLMs_Optim <- function(object,
+                                   modelMatrix,
+                                   lambda,
+                                   rowsForOptim,
+                                   rowStable,
+                                   normalizationFactors,
+                                   alpha_hat,
+                                   betaMatrix,
+                                   betaSE,
+                                   betaConv,
+                                   beta_mat,
+                                   mu,
+                                   logLike) {
   scaleCols <- apply(modelMatrix,2,function(z) max(abs(z)))
   stopifnot(all(scaleCols > 0))
   x <- sweep(modelMatrix,2,scaleCols,"/")
@@ -361,40 +405,6 @@ fitNbinomGLMsOptim <- function(object,modelMatrix,lambda,
               mu=mu,logLike=logLike))
 }
 
-# Fit beta coefficients for negative binomial GLM
-#
-# This function estimates the coefficients (betas) for negative binomial generalized linear models.
-#
-# ySEXP n by m matrix of counts
-# xSEXP m by k design matrix
-# nfSEXP n by m matrix of normalization factors
-# alpha_hatSEXP n length vector of the disperion estimates
-# contrastSEXP a k length vector for a possible contrast
-# beta_matSEXP n by k matrix of the initial estimates for the betas
-# lambdaSEXP k length vector of the ridge values
-# tolSEXP tolerance for convergence in estimates
-# maxitSEXP maximum number of iterations
-# useQRSEXP whether to use QR decomposition
-#
-# Note: at this level the betas are on the natural log scale
-fitBetaWrapper <- function (ySEXP, xSEXP, nfSEXP, alpha_hatSEXP, contrastSEXP,
-                            beta_matSEXP, lambdaSEXP, tolSEXP, maxitSEXP, useQRSEXP) {
-  if ( missing(contrastSEXP) ) {
-    # contrast is not required, just give 1,0,0,...
-    contrastSEXP <- c(1,rep(0,ncol(xSEXP)-1))
-  }
-  # test for any NAs in arguments
-  arg.names <- names(formals(fitBetaWrapper))
-  na.test <- sapply(mget(arg.names), function(x) any(is.na(x)))
-  if (any(na.test)) stop(paste("in call to fitBeta, the following arguments contain NA:",
-                               paste(arg.names[na.test],collapse=", ")))
-
-  fitBeta2(ySEXP=ySEXP, xSEXP=xSEXP, nfSEXP=nfSEXP, alpha_hatSEXP=alpha_hatSEXP,
-          contrastSEXP=contrastSEXP, beta_matSEXP=beta_matSEXP,
-          lambdaSEXP=lambdaSEXP, tolSEXP=tolSEXP, maxitSEXP=maxitSEXP,
-          useQRSEXP=useQRSEXP)
-}
-
 ###
 
 # Get base means and variances
@@ -408,85 +418,69 @@ fitBetaWrapper <- function (ySEXP, xSEXP, nfSEXP, alpha_hatSEXP, contrastSEXP,
 #
 # return a DESeqDataSet object with columns baseMean
 # and baseVar in the row metadata columns
-#' @importFrom genefilter rowVars
-getBaseMeansAndVariances <- function(object) {
+#' @importFrom matrixStats rowVars
+#' @importFrom S4Vectors mcols mcols<-
+.get_base_means_and_variances <- function(object) {
   meanVarZero <- DataFrame(baseMean = unname(rowMeans(counts(object,normalized=TRUE))),
                            baseVar = unname(rowVars(counts(object,normalized=TRUE))),
                            allZero = unname(rowSums(counts(object)) == 0))
   mcols(meanVarZero) <- DataFrame(type = rep("intermediate",ncol(meanVarZero)),
                                   description = c("mean of normalized counts for all samples",
-                                    "variance of normalized counts for all samples",
-                                    "all counts for a gene are zero"))
+                                                  "variance of normalized counts for all samples",
+                                                  "all counts for a gene are zero"))
   if (all(c("baseMean","baseVar","allZero") %in% names(mcols(object)))) {
-      mcols(object)[c("baseMean","baseVar","allZero")] <- meanVarZero
+    mcols(object)[c("baseMean","baseVar","allZero")] <- meanVarZero
   } else {
-      mcols(object) <- cbind(mcols(object),meanVarZero)
+    mcols(object) <- cbind(mcols(object),meanVarZero)
   }
   return(object)
 }
 
 
+
+
+
+
 # convenience function for testing the log likelihood
 # for a count matrix, mu matrix and vector disp
-nbinomLogLike <- function(counts, mu, disp) {
-  rowSums(matrix(dnbinom(counts, mu=mu,size=1/disp,
-                         log=TRUE),ncol=ncol(counts)))
+#' @importFrom stats dnbinom
+.get_nbinom_log_like <- function(counts, mu, disp) {
+  nbd <- dnbinom(counts,
+                 mu = mu,
+                 size = 1/disp,
+                 log = TRUE)
+  mat <- matrix(nbd, ncol = ncol(counts))
+  rowSums(mat)
 }
-sanitizeRowData <- function(object) {
-  if (is.null(mcols(mcols(object)))) {
-    mcols(mcols(object)) <- DataFrame(type=rep("input",ncol(mcols(object))),
-                                      description=character(ncol(mcols(object))))
+
+#' @importFrom S4Vectors mcols mcols<-
+.sanitize_rowData <- function(object) {
+  mc <- mcols(mcols(object))
+  if (is.null(mc)) {
+    mc <- DataFrame(type = rep("input",ncol(mcols(object))),
+                    description = character(ncol(mcols(object))))
+  } else {
+    mc$type <- as.character(mc$type)
+    mc$description <- as.character(mc$description)
+    mc$type[is.na(mc$type)] <- ""
+    mc$description[is.na(mc$description)] <- ""
   }
-  class(mcols(mcols(object))$type) <- "character"
-  class(mcols(mcols(object))$description) <- "character"
-  mcols(mcols(object))$type[ is.na(mcols(mcols(object))$type) ] <- ""
-  mcols(mcols(object))$description[ is.na(mcols(mcols(object))$description) ] <- ""
+  mcols(mcols(object)) <- mc
   object
 }
-factorPresentThreeOrMoreLevels <- function(object) {
-  designFactors <- getDesignFactors(object)
-  threeOrMore <- sapply(designFactors,function(v) nlevels(colData(object)[[v]]) >= 3)
-  any(threeOrMore)
-}
-getDesignFactors <- function(object) {
-  design <- design(object)
-  designVars <- all.vars(design)
-  designVarsClass <- sapply(designVars, function(v) class(colData(object)[[v]]))
-  designVars[designVarsClass == "factor"]
-}
+
+
 # convenience function for building larger matrices
 # by filling in NA rows
-buildMatrixWithNARows <- function(m, NARows) {
+.build_matrix_with_NA_rows <- function(m, NARows) {
   mFull <- matrix(NA, ncol=ncol(m), nrow=length(NARows))
   mFull[!NARows,] <- m
   mFull
 }
 
-
-# convenience function for breaking up matrices
-# by column and preserving column names
-matrixToList <- function(m) {
-  l <- split(m, col(m))
-  names(l) <- colnames(m)
-  l
-}
-
-# convenience function to make more descriptive names
-# for factor variables
-renameModelMatrixColumns <- function(data, design) {
-  data <- as.data.frame(data)
-  designVars <- all.vars(design)
-  designVarsClass <- sapply(designVars, function(v) class(data[[v]]))
-  factorVars <- designVars[designVarsClass == "factor"]
-  colNamesFrom <- make.names(do.call(c,lapply(factorVars, function(v) paste0(v,levels(data[[v]])[-1]))))
-  colNamesTo <- make.names(do.call(c,lapply(factorVars, function(v) paste0(v,"_",levels(data[[v]])[-1],"_vs_",levels(data[[v]])[1]))))
-  data.frame(from=colNamesFrom,to=colNamesTo,stringsAsFactors=FALSE)
-}
-
-
 # convenience function for building results tables
 # out of a list and filling in NA rows
-buildDataFrameWithNARows <- function(resultsList, NArows) {
+.build_DataFrame_with_NA_rows <- function(resultsList, NArows) {
   lengths <- sapply(resultsList,length)
   if (!all(lengths == lengths[1])) {
     stop("lengths of vectors in resultsList must be equal")
@@ -503,64 +497,36 @@ buildDataFrameWithNARows <- function(resultsList, NArows) {
   dfFull
 }
 
-estimateSizeFactorsForMatrix <- function( counts, locfunc = stats::median, geoMeans, controlGenes )
-{
-  if (missing(geoMeans)) {
-    loggeomeans <- rowMeans(log(counts))
-  } else {
-    if (length(geoMeans) != nrow(counts)) {
-      stop("geoMeans should be as long as the number of rows of counts")
-    }
-    loggeomeans <- log(geoMeans)
-  }
-  if (all(is.infinite(loggeomeans))) {
-    stop("every gene contains at least one zero, cannot compute log geometric means")
-  }
-  sf <- if (missing(controlGenes)) {
-    apply(counts, 2, function(cnts) {
-      exp(locfunc((log(cnts) - loggeomeans)[is.finite(loggeomeans) & cnts > 0]))
-    })
-  } else {
-    if ( !( is.numeric(controlGenes) | is.logical(controlGenes) ) ) {
-      stop("controlGenes should be either a numeric or logical vector")
-    }
-    loggeomeansSub <- loggeomeans[controlGenes]
-    apply(counts[controlGenes,,drop=FALSE], 2, function(cnts) {
-      exp(locfunc((log(cnts) - loggeomeansSub)[is.finite(loggeomeansSub) & cnts > 0]))
-    })
-  }
-  sf
+
+# convenience function for breaking up matrices
+# by column and preserving column names
+.matrix_to_list <- function(m) {
+  l <- split(m, col(m))
+  names(l) <- colnames(m)
+  l
 }
 
-xtailDispersionFit <- function(rawmeans, rawdisps, quantilePercent=0.35, binnum=50, minDisp=1e-8){
-  useForFit <- rawdisps > 100 * minDisp
-  if(sum(useForFit) == 0){
-    return (rawdisps)
-    stop("all gene-wise dispersion estimates are within 2 orders of magnitude
-    from the minimum value, and so the gene-wise estimates as final estimates.")
-  }
-  usedMeans <- rawmeans[useForFit]
-  usedDisps <- rawdisps[useForFit]
-  sortMeans <- usedMeans[order(usedMeans)]
-  sortDisps <- usedDisps[order(usedMeans)]
-  genenum <- length(sortMeans)
-  quantile_means <- c()
-  quantile_disps <- c()
-  for(i in seq(1,genenum,binnum)){
-    num = min(binnum,genenum-i+1)
-    if(num<(binnum)){
-      next
-    }
-    curbin_means <- sortMeans[i:(i+num-1)]
-    curbin_disps <- sortDisps[i:(i+num-1)]
-
-    m <- curbin_means[order(curbin_disps)][1:floor(num*quantilePercent)]
-    d <- curbin_disps[order(curbin_disps)][1:floor(num*quantilePercent)]
-    quantile_means <- c(quantile_means, m)
-    quantile_disps <- c(quantile_disps, d)
-  }
-  dat <- data.frame(logDisps = log(quantile_disps), logMeans=log(quantile_means))
-  fit <- locfit(logDisps~logMeans, data=dat[quantile_disps>=minDisp*10,,drop=FALSE])
-  dispFit <- function(rawmeans)exp(predict(fit,data.frame(logMeans=log(rawmeans))))
-  dispFit
+# convenience function to make more descriptive names
+# for factor variables
+.rename_model_matrix_columns <- function(data, design) {
+  data <- as.data.frame(data)
+  designVars <- all.vars(design)
+  designVarsClass <- sapply(designVars, function(v) class(data[[v]]))
+  factorVars <- designVars[designVarsClass == "factor"]
+  colNamesFrom <- make.names(do.call(c,lapply(factorVars, function(v) paste0(v,levels(data[[v]])[-1]))))
+  colNamesTo <- make.names(do.call(c,lapply(factorVars, function(v) paste0(v,"_",levels(data[[v]])[-1],"_vs_",levels(data[[v]])[1]))))
+  data.frame(from=colNamesFrom,to=colNamesTo,stringsAsFactors=FALSE)
 }
+
+
+# .factor_present_three_or_more_levels <- function(object) {
+#   designFactors <- .get_design_factors(object)
+#   threeOrMore <- sapply(designFactors,function(v) nlevels(colData(object)[[v]]) >= 3)
+#   any(threeOrMore)
+# }
+#
+# .get_design_factors <- function(object) {
+#   design <- design(object)
+#   designVars <- all.vars(design)
+#   designVars[vapply(designVars, is.factor, logical(1))]
+# }

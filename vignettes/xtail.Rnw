@@ -132,7 +132,7 @@ write.table(test.tab,"test_results.txt",quote=F,sep="\t")
 We also provide a very simple function, \texttt{write.xtail} (using the write.table function), to export the \verb'xtail' result (test.results) to a tab delimited file.
 
 <<writextailResult,eval=FALSE>>=
-write.xtail(test.results,"test_results.txt",quote=F,sep="\t")
+write.xtail(test.results,"test_results.txt",write.args = list(quote=F,sep="\t"))
 @
 
 

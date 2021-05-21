@@ -1,7 +1,7 @@
 Package: xtail
 Type: Package
 Title: Genome-wide assessment of differential translations with ribosome profiling data
-Version: 1.1.6
+Version: 1.2.0
 Author: Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
 Maintainer: Zhengtao Xiao <xzt13@tsinghua.org.cn>; Rongyao Huang <THUhry12@163.com>
 Description: 
@@ -9,25 +9,40 @@ Description:
     differential translation across two different experiment conditions using
     both RNA-seq data and ribosom profiling data.
 License:
-    GPL (>= 3)
+    GPL (>= 3) | file LICENSE
 Encoding: UTF-8
 NeedsCompilation: yes
 Depends: 
-    SummarizedExperiment,
-    DESeq2
+    DESeq2,
+    S4Vectors,
+    BiocGenerics
 Imports:
-    GenomicAlignments,
-    Rsamtools,
     methods,
     parallel,
     Rcpp (> 0.10.1),
-    genefilter
+    matrixStats,
+    SummarizedExperiment,
+    locfit,
+    ggplot2
 Suggests:
     knitr,
-    BiocStyle
+    BiocStyle,
+    testthat
+Collate:
+    'xtail-package.R'
+    'xtail-class.R'
+    'RcppExports.R'
+    'wrapper-functions.R'
+    'estimate-functions.R'
+    'xtail.R'
+    'plot-utils.R'
+    'plot-fc.R'
+    'plot-r.R'
+    'plot-volcano.R'
 LinkingTo:
     Rcpp,
     RcppArmadillo
 VignetteBuilder: knitr
 URL: https://github.com/xryanglab/xtail
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
