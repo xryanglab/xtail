@@ -11,7 +11,7 @@ a list of matrices
 an example results
 }
 \usage{
-data(xtestdata)
+data(xtaildata)
 
 data(xtailres)
 }

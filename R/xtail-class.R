@@ -299,6 +299,7 @@ setMethod("show", signature = "xtail",
 #'   p-value lower than \code{alpha} will be reported.
 #'
 #' @export
+#' @exportS3Method
 summary.xtail <- function(object, alpha = 0.1, ...){
     .show_xtail(object, alpha = alpha)
 }

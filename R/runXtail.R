@@ -35,7 +35,7 @@
 #' test.rpf <- xtaildata$rpf[1:100,]
 #' condition <- c("control","control","treat","treat")
 #'
-#' se <- SummarizedExoeriment(assays = list(mrna = test.mrna, rpf = test.rpf),
+#' se <- SummarizedExperiment(assays = list(mrna = test.mrna, rpf = test.rpf),
 #'                            colData = DataFrame(condition = condition))
 #' xtail <- runXtail(se, "mrna", "rpf", bins = 1000, threads = 2)
 #' xtail

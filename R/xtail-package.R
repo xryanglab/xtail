@@ -24,7 +24,7 @@ NULL
 #'
 #' @name xtaildata
 #' @format a list of matrices
-#' @usage data(xtestdata)
+#' @usage data(xtaildata)
 "xtaildata"
 #' @rdname xtaildata
 #' @format an example results
