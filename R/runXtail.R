@@ -37,10 +37,12 @@
 #'
 #' se <- SummarizedExperiment(assays = list(mrna = test.mrna, rpf = test.rpf),
 #'                            colData = DataFrame(condition = condition))
-#' xtail <- runXtail(se, "mrna", "rpf", bins = 1000, threads = 2)
+#' xtail <- runXtail(se, "mrna", "rpf", condition = colData(se)$condition,
+#'                   bins = 1000, threads = 2)
 #' xtail
 #'
-#' se <- addXtail(se, "mrna", "rpf", bins = 1000, threads = 2)
+#' se <- addXtail(se, "mrna", "rpf", condition = colData(se)$condition,
+#'                bins = 1000, threads = 2)
 #' rowData(se)
 NULL
 

@@ -7,6 +7,7 @@
 \alias{resultsNum}
 \alias{resultsNum,xtail-method}
 \alias{resultsTable,xtail-method}
+\alias{summary}
 \alias{summary.xtail}
 \title{Results table of xtail results}
 \usage{
@@ -20,7 +21,9 @@ resultsTable(object, ...)
 
 \S4method{resultsTable}{xtail}(object, sort.by = NULL, log2FCs = FALSE, log2Rs = FALSE)
 
-summary.xtail(object, alpha = 0.1, ...)
+summary(object, ...)
+
+\method{summary}{xtail}(object, alpha = 0.1, ...)
 }
 \arguments{
 \item{object}{a \code{xtail} object}
