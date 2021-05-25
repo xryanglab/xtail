@@ -38,6 +38,7 @@ Imports:
     ggplot2
 Suggests:
     knitr,
+    rmarkdown,
     BiocStyle,
     testthat
 Collate:
