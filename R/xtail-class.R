@@ -332,8 +332,8 @@ summary.xtail <- function(object, alpha = 0.1, ...){
 #' @export
 #'
 #' @examples
-#' data(xtestres)
-#' write.xtail(xtestres, file = tempfile())
+#' data(xtailres)
+#' write.xtail(xtailres, file = tempfile())
 write.xtail <- function(object, ..., write.args = list()){
     # input check
     if(!is.list(write.args)){

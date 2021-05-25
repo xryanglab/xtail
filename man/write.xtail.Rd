@@ -20,8 +20,8 @@ invisible result from \code{write.table}
 xtail results can be directly written to file using \code{write.xtail}
 }
 \examples{
-data(xtestres)
-write.xtail(xtestres, file = tempfile())
+data(xtailres)
+write.xtail(xtailres, file = tempfile())
 }
 \seealso{
 \code{\link[utils:write.table]{write.table}}
