@@ -1,0 +1,160 @@
+---
+title: "Genome-wide assessment of differential translations with ribosome profiling data the xtail package"
+author:
+- name: Zhengtao Xiao
+  affiliation: 
+  - MOE Key Laboratory of Bioinformatics
+  - Tsinghua-Peking Joint Center for Life Sciences
+  - School of Life Sciences, Tsinghua University, Beijing 100084, China
+- name: Qin Zou
+  affiliation: 
+  - MOE Key Laboratory of Bioinformatics
+  - Tsinghua-Peking Joint Center for Life Sciences
+  - School of Life Sciences, Tsinghua University, Beijing 100084, China
+- name: Yu Liu
+  affiliation: 
+  - MOE Key Laboratory of Bioinformatics
+  - Tsinghua-Peking Joint Center for Life Sciences
+  - School of Life Sciences, Tsinghua University, Beijing 100084, China
+- name: Xuerui Yang
+  affiliation: 
+  - MOE Key Laboratory of Bioinformatics
+  - Tsinghua-Peking Joint Center for Life Sciences
+  - School of Life Sciences, Tsinghua University, Beijing 100084, China
+date: "`r Sys.Date()`"
+package: xtail
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{xtail}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+abstract: >
+    If you use xtail in published research, please cite: \n
+    Z. Xiao, Q. Zou, Y. Liu, X. Yang: **Genome-wide assessment of differential translations with ribosome profiling data**.
+    **Nat Commun** 2016, 7:11194. http://www.ncbi.nlm.nih.gov/pubmed/27041671
+---
+
+# Introduction
+
+This package, Xtail, is for identification of genes undergoing differential translation across two conditions with ribosome profiling data. Xtail is based on a simple assumption that if a gene is subjected to translational dyresgulation under certain exprimental or physiological condition, the change of its RPF abundance should be discoordinated with that of mRNA expression. Specifically, `xtail` consists of three major steps: (1) modeling of ribosome profiling data using negative binomial distribution (NB), (2) estabilishment of probability distributions for fold changes of mRNA or RPF (or RPF-to-mRNA ratios), and (3) evaluation of statistical significance and magnitude of differential translations. The differential translation of each gene is evaluated by two pipelines:
+in the first one, `xtail` calculated the posterior probabilities for a range of mRNA or RPF fold changes, and eventually estabilished their probability distributions. These two distributions, represented as probability vectors, were then used to estabilish a joint probability distribution matrix, from which a new probability distribution were generated for differential translation. The P-values, point estimates and credible intervals of differential tranlsations were then calculated based on these results. In the other parallel pipline, `xtail` established probability distributions for RPF-to-mRNA ratios in two conditions and derived another distribution for differential translation. The more conserved set of results from these two parallel piplines was used as the final result. With this strategy, `xtail` performs quantification of differential translation for each gene, i.e., the extent to which a gene`s translational rate is not coordinated with the change of the mRNA expression.
+
+By default, `Xtail` adapts the strategy of DESeq2 [[@Love2014]](#references) to normalize read counts of mRNA and RPF in all samples, and fits NB distributions with dispersions $\alpha$ and $\mu$.
+
+This guide provides step-by-step instructions on how to load data, how to execute the package and how to interpret output.
+
+# Data Preparation
+
+The `xtail` package uses read counts of RPF and mRNA, in the form of rectangular table of values. The rows and columns of the table represent the genes and samples, respectively. Each cell in the `g-th` row and the `i-th` columns is the count number of reads mapped to gene `g` in sample `i`.
+
+Xtail takes in raw read counts of RPF and mRNA, and performs median-of-ratios normalization by default. This normalization method is also recommend by Reddy R. [[@Reddy026062]](#references). Alternatively, users can provide normalized read counts and skip the built-in normalization in Xtail.
+
+In this vignette, we select a published ribosome profiling dataset from human prostate cancer cell PC3 after mTOR signaling inhibition with PP242 [[@Hsieh2012]](#references). This dataset consists of mRNA and RPF data for 11391 genes in two replicates from each of the two conditions(`treatment` vs. `control`).
+
+# An example
+
+Here we run `xtail` with the ribosome profiling data described above. First we load the library and data.
+
+```{r begin,results="hold",message=FALSE}
+library(xtail)
+data(xtaildata)
+```
+
+Next we can view the first five lines of the mRNA (`mrna`) and RPF (`rpf`) elements of `xtaildata`.
+
+```{r }
+mrna <- xtaildata$mrna
+rpf <- xtaildata$rpf
+head(mrna,5)
+head(rpf,5)
+```
+
+We assign condition labels to the columns of the mRNA and RPF data.
+
+```{r }
+condition <- c("control","control","treat","treat")
+```
+
+Next, we run the main function, `xtail()`. By default, the second condition (here is `treat`) would be compared against the first condition (here is `control`). Those genes with the minimum average expression of mRNA counts and RPF counts among all samples larger than 1 are used (can be changed by setting `minMeanCount`). All the available CPU cores are used for running program. The argument `bins` is the number of bins used for calculating the probability densities of log2FC and log2R. This paramater will determine accuracy of the final pvalue. Here, in order to keep the run-time of this vignette short, we will set `bins` to `1000`. Detailed description of the arguments of the `xtail` function can be found by typing `?xtail` at the `R` prompt.
+
+```{r }
+test.results <- xtail(mrna,rpf,condition,bins=1000)
+```
+
+Now we can extract a results table using the function `resultsTable}, and examine the first five lines of the results table.
+
+```{r inspectData,echo=TRUE}
+test.tab <- resultsTable(test.results)
+head(test.tab,5)
+```
+
+The results of fist pipline are named with suffix `\_v1`, which are generated by comparing mRNA and RPF log2 fold changes: The element `log2FC_TE_v1` represents the log2 fold change of TE; The `pvalue_v1` represent statistical significance. The sencond pipline are named with suffix `\_v2`, which are derived by comparing log2 ratios between two conditions: `log2FC_TE_v2`, and `pvalue_v2` are log2 ratio of TE, and pvalues. Finally, the more conserved results (with larger-Pvalue) was select as the final assessment of differential translation, which are named with suffix `\_final`. The `pvalue.adjust` is the estimated false discovery rate corresponding to the `pvalue_final`.
+
+Users can also get the log2 fold changes of mRNA and RPF, or the log2 ratios of two conditions by setting `log2FCs` or `log2Rs` as `TRUE` in resultsTable. And the results table can be sorted by assigning the `sort.by`. Detailed description of the `resultsTable` function can be found by typing `?resultsTable`.
+
+Finally, the plain-text file of the results can be exported using the functions `write.csv` or `write.table`.
+
+```{r writeResult,eval=FALSE}
+write.table(test.tab,"test_results.txt",quote=FALSE,sep="\t")
+```
+
+We also provide a very simple function, `write.xtail` (using the write.table function), to export the `xtail` result (test.results) to a tab delimited file.
+
+```{r writextailResult,eval=FALSE}
+write.xtail(test.results,"test_results.txt",
+            write.args = list(quote = FALSE,sep = "\t"))
+```
+
+# Visualization
+
+## plotFCs
+
+In `Xtail`, the function `plotFCs` shows the result of the differential expression at the two expression levels, where each gene is a dot whose position is determined by its log2 fold change (log2FC) of transcriptional level (`mRNA_log2FC`), represented on the x-axis, and the log2FC of translational level (`RPF_log2FC`), represented on the y-axis (Figure \@ref(fig:plotFCs)). The optional input parameter of `plotFCs` is `log2FC.cutoff`, a non-negative threshold value that will divide the genes into different classes:
+
+- `blue`: for genes whoes `mRNA_log2FC` larger than `log2FC.cutoff` (transcriptional level).
+- `red`: for genes whoes `RPF_log2FC` larger than `log2FC.cutoff` (translational level).
+- `green`: for genes changing homodirectionally at both level.
+- `yellow`: for genes changing antidirectionally at two levels.
+
+```{r plotFCs, fig.cap="Scatter plot of log2 fold changes"}
+plotFCs(test.results)
+```
+
+Those genes in which the difference of `mRNA_log2FC` and `RPF_log2FC` did not exceed more than `log2FC.cutoff` are excluded. The points will be color-coded with the `pvalue_final` obtained with `xtail` (more significant p values having darker color). By default the `log2FC.cutoff` is 1.
+
+## plotRs
+
+Similar to `plotFCs`, the function `plotRs` shows the RPF-to-mRNA ratios in two conditions, where the position of each gene is determined by its RPF-to-mRNA ratio (log2R) in two conditions, represented on the x-axis and y-axis respectively (Figure \@ref(fig:plotRs)). The optional input parameter `log2R.cutoff` (non-negative threshold value) will divide the genes into different classes:
+
+- `blue`: for genes whoes `log2R` larger in first condition than second condition.
+- `red`: for genes whoes `log2R` larger in second condition than the first condition.
+- `green`: for genes whoes `log2R` changing homodirectionally in two condition.
+- `yellow`: for genes whoes `log2R` changing antidirectionally in two conditon.
+
+```{r plotRs, fig.cap="Scatter plot of log2 RPF-to-mRNA ratios"}
+plotRs(test.results)
+```
+
+Those genes in which the difference of `log2R` in two conditions did not exceed more than `log2R.cutoff` are excluded. The points will be color-coded with the `pvalue_final` obtained with `xtail` (more significant p values having darker color). By default the `log2R.cutoff` is 1.
+
+
+## volcanoPlot
+
+It can also be useful to evaluate the fold changes cutoff and p values thresholds by looking at the volcano plot. A simple function for making this plot is `volcanoPlot`, in which the `log2FC_TE_final` is plotted on the x-axis and the negative log10 `pvalue_final` is plotted on the y-axis (Figure \@ref(fig:volcanoPlot)).
+
+```{r volcanoPlot, fig.cap="volcano plot"}
+volcanoPlot(test.results)
+```
+
+# Session info {.unnumbered}
+
+```{r}
+sessionInfo()
+```
+
+# References {.unnumbered}

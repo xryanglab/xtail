@@ -27,7 +27,8 @@ summary.xtail(object, alpha = 0.1, ...)
 
 \item{...}{optional arguments. Currently not used}
 
-\item{sort.by}{the sorted column. By default, the pvalue.adjust is used.}
+\item{sort.by}{the column to sort with. Defaults to \code{NULL} to disable
+sorting.}
 
 \item{log2FCs}{\code{TRUE} or \code{FALSE}: Should log2 fold change values be
 returned? (defaults to \code{TRUE})}
@@ -38,6 +39,18 @@ returned? (defaults to \code{TRUE})}
 \item{alpha}{cut off for summarizing results. Only results with a adjusted
 p-value lower than \code{alpha} will be reported.}
 }
+\value{
+a \code{DataFrame} with the results or numeric vectors
+}
 \description{
 To retrieve the results from the xtail run use one of the accessor functions.
+}
+\examples{
+data(xtailres)
+resultsTable(xtailres)
+conditions(xtailres)
+resultsNum(xtailres)
+
+# sorting or results
+resultsTable(xtailres, sort.by = "pvalue.adjust")
 }

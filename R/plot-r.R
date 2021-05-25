@@ -19,7 +19,13 @@
 #'
 #' @param ... optional arguments. Currently not used
 #'
+#' @return a \code{ggplot} object
+#'
 #' @name plotRs
+#'
+#' @examples
+#' data(xtailres)
+#' plotRs(xtailres)
 NULL
 
 #' @rdname plotRs
@@ -67,7 +73,7 @@ setMethod("plotRs", signature = "xtail",
                         "homodirectional" = "#75E805",
                         "opposite change" = "#FFDE13",
                         "stable" = "gray90")
-        names(categories)[1:2] <- paste0(conditions(object), " only")
+        names(categories)[seq_len(2L)] <- paste0(conditions(object), " only")
         x <- cond[1L]
         y <- cond[2L]
         .plot_scatter(table, x, y, categories, log2R.cutoff, xlim, ylim)

@@ -19,7 +19,13 @@
 #'
 #' @param ... optional arguments. Currently not used
 #'
+#' @return a \code{ggplot} object
+#'
 #' @name plotFCs
+#'
+#' @examples
+#' data(xtailres)
+#' plotFCs(xtailres)
 NULL
 
 #' @rdname plotFCs

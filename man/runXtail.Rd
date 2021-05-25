@@ -31,13 +31,31 @@ the \code{rpf} data.}
 \code{runXtail} and \code{\link[=xtail]{xtail}}.}
 }}
 }
+\value{
+A \code{\link[=xtail]{xtail}} object for \code{runXtail} or
+an object of \code{class(x)}.
+}
 \description{
-The \code{\link[xtail:Xtail]{xtail}} function can be used directly with
+The \code{\link[=xtail]{xtail}} function can be used directly with
 \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
 objects. The \code{mrna} and \code{rpf} data must be stored as two separate
 assays.
 }
 \details{
-See \code{\link[xtail:Xtail]{xtail}} for more details on the analysis
+See \code{\link[=xtail]{xtail}} for more details on the analysis
 function.
+}
+\examples{
+data(xtaildata)
+test.mrna <- xtaildata$mrna[1:100,]
+test.rpf <- xtaildata$rpf[1:100,]
+condition <- c("control","control","treat","treat")
+
+se <- SummarizedExoeriment(assays = list(mrna = test.mrna, rpf = test.rpf),
+                           colData = DataFrame(condition = condition))
+xtail <- runXtail(se, "mrna", "rpf", bins = 1000, threads = 2)
+xtail
+
+se <- addXtail(se, "mrna", "rpf", bins = 1000, threads = 2)
+rowData(se)
 }

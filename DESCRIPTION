@@ -2,22 +2,34 @@ Package: xtail
 Type: Package
 Title: Genome-wide assessment of differential translations with ribosome profiling data
 Version: 1.2.0
-Author: Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
-Maintainer: Zhengtao Xiao <xzt13@tsinghua.org.cn>; Rongyao Huang <THUhry12@163.com>
+Authors@R:
+    c(person("Zhengtao", "Xiao", email="xzt13@tsinghua.org.cn",
+             role = c("aut","cre")),
+      person("Qin", "Zou", role = "aut"),
+      person("Yu", "Liu", role = "aut"),
+      person("Xuerui", "Yang", role = "aut"),
+      person("Rongyao", "Huang", email = "THUhry12@163.com", role = "ctb"))
 Description: 
-    The purpose of this package is to discover the genes undergoing
-    differential translation across two different experiment conditions using
-    both RNA-seq data and ribosom profiling data.
+    The xtail package implements the method of the same name to discover the 
+    genes undergoing differential translation across two different experiment 
+    conditions using both RNA-seq data and ribosome profiling data. For 
+    estimation the method relies on DESeq2. For visualizing the results
+    plotting functions are available as well.
 License:
     GPL (>= 3) | file LICENSE
 Encoding: UTF-8
 NeedsCompilation: yes
-Depends: 
+biocViews: 
+    Software, DifferentialExpression
+Depends:
+    R (>= 4.0), 
     DESeq2,
     S4Vectors,
     BiocGenerics
 Imports:
     methods,
+    stats,
+    utils,
     parallel,
     Rcpp (> 0.10.1),
     matrixStats,

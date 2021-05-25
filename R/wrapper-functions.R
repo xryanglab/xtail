@@ -24,38 +24,39 @@
                       tolSEXP,
                       maxitSEXP,
                       useQRSEXP) {
-  if ( missing(contrastSEXP) ) {
-    # contrast is not required, just give 1,0,0,...
-    contrastSEXP <- c(1,rep(0,ncol(xSEXP)-1))
-  }
-  # test for any NAs in arguments
-  arg.names <- names(formals(.fit_Beta))
-  na.test <- sapply(mget(arg.names), function(x) any(is.na(x)))
-  if (any(na.test)) {
-    stop(paste("in call to fitBeta, the following arguments contain NA:",
-               paste(arg.names[na.test],collapse=", ")),
-         call. = FALSE)
-  }
-  fitBeta2(ySEXP=ySEXP, xSEXP=xSEXP, nfSEXP=nfSEXP, alpha_hatSEXP=alpha_hatSEXP,
-           contrastSEXP=contrastSEXP, beta_matSEXP=beta_matSEXP,
-           lambdaSEXP=lambdaSEXP, tolSEXP=tolSEXP, maxitSEXP=maxitSEXP,
-           useQRSEXP=useQRSEXP)
+    if ( missing(contrastSEXP) ) {
+        # contrast is not required, just give 1,0,0,...
+        contrastSEXP <- c(1,rep(0,ncol(xSEXP)-1))
+    }
+    # test for any NAs in arguments
+    arg.names <- names(formals(.fit_Beta))
+    na.test <- vapply(mget(arg.names), function(x) any(is.na(x)),
+                      logical(1))
+    if (any(na.test)) {
+        stop(paste("in call to fitBeta, the following arguments contain NA:",
+                   paste(arg.names[na.test],collapse=", ")),
+             call. = FALSE)
+    }
+    fitBeta2(ySEXP=ySEXP, xSEXP=xSEXP, nfSEXP=nfSEXP, alpha_hatSEXP=alpha_hatSEXP,
+             contrastSEXP=contrastSEXP, beta_matSEXP=beta_matSEXP,
+             lambdaSEXP=lambdaSEXP, tolSEXP=tolSEXP, maxitSEXP=maxitSEXP,
+             useQRSEXP=useQRSEXP)
 }
 
 .xtail_test_wrapper <- function(X){
-  res <- xtail_test(counts1[X,],
-                    counts2[X,],
-                    intercept1[X],
-                    intercept2[X],
-                    log2Ratio1[X],
-                    log2Ratio2[X],
-                    dispersion1[X,],
-                    dispersion2[X,],
-                    sizefactor1,
-                    sizefactor2,
-                    cond1,
-                    cond2,
-                    bins,
-                    ci)
-  res
+    res <- xtail_test(counts1[X,],
+                      counts2[X,],
+                      intercept1[X],
+                      intercept2[X],
+                      log2Ratio1[X],
+                      log2Ratio2[X],
+                      dispersion1[X,],
+                      dispersion2[X,],
+                      sizefactor1,
+                      sizefactor2,
+                      cond1,
+                      cond2,
+                      bins,
+                      ci)
+    res
 }

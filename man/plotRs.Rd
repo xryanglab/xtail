@@ -24,9 +24,16 @@ details.}
 \code{\link[ggplot2:scale_continuous]{scale_continuous}} for more
 details.}
 }
+\value{
+a \code{ggplot} object
+}
 \description{
 A simple function that plots the log2 RPF-to-mRNA ratios in two conditions.
 Different classes of genes are labeled with different of color.
 Each dot, representing a particular gene, are color coded by the category of
 expression change.
+}
+\examples{
+data(xtailres)
+plotRs(xtailres)
 }

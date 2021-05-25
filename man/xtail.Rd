@@ -4,7 +4,7 @@
 \name{xtail-class}
 \alias{xtail-class}
 \alias{xtail}
-\title{The xtail result class}
+\title{A tool to quantitatively assess differential translations with ribosome profiling data.}
 \usage{
 xtail(
   mrna,
@@ -55,6 +55,9 @@ accuracy of pvalue. Set it small for a very quick test run.}
 
 \item{ci}{The level of confindence to get credible intervals of log2 fold
 change of translational efficiency (TE), for example 0.95.}
+}
+\value{
+a \code{xtail} object
 }
 \description{
 By pairwise comparisons of ribosome profiling data, Xtail

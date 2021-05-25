@@ -34,6 +34,8 @@
 #'   of log2FC or log2R (default is 10000). This paramater will determine
 #'   accuracy of pvalue. Set it small for a very quick test run.
 #'
+#' @return a \code{xtail} object
+#'
 #' @details No missing values are allowed in input data mrna and rpf.
 #'
 #' Duplicate row names (gene names or gene ids) are not allowed.
@@ -110,7 +112,7 @@ XTAIL_DISPERSION_ASSAY <- "dispersion"
     if (normalize){
         message("Calculating the library size factors")
         pool_sizeFactor <- .estimate_size_factors_for_matrix(cbind(mrna,rpf))
-        mrna_sizeFactor <- pool_sizeFactor[1:ncol(mrna)]
+        mrna_sizeFactor <- pool_sizeFactor[seq_len(ncol(mrna))]
         rpf_sizeFactor <- pool_sizeFactor[(ncol(mrna)+1):(ncol(mrna)+ncol(rpf))]
     } else {
         mrna_sizeFactor <- rep(1, ncol(mrna))
@@ -293,8 +295,8 @@ xtail <- function(mrna,
     curbin_means <- sortMeans[i:(i+num-1)]
     curbin_disps <- sortDisps[i:(i+num-1)]
 
-    m <- curbin_means[order(curbin_disps)][1:floor(num*quantilePercent)]
-    d <- curbin_disps[order(curbin_disps)][1:floor(num*quantilePercent)]
+    m <- curbin_means[order(curbin_disps)][seq_len(floor(num*quantilePercent))]
+    d <- curbin_disps[order(curbin_disps)][seq_len(floor(num*quantilePercent))]
     quantile_means <- c(quantile_means, m)
     quantile_disps <- c(quantile_disps, d)
   }

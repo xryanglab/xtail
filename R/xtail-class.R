@@ -1,5 +1,3 @@
-#' The xtail result class
-#'
 #' @rdname xtail
 #' @export
 setClass("xtail",
@@ -149,7 +147,8 @@ setValidity("xtail", .valid_xtail)
 #'
 #' @param object a \code{xtail} object
 #'
-#' @param sort.by the sorted column. By default, the pvalue.adjust is used.
+#' @param sort.by the column to sort with. Defaults to \code{NULL} to disable
+#'   sorting.
 #'
 #' @param log2FCs \code{TRUE} or \code{FALSE}: Should log2 fold change values be
 #'   returned? (defaults to \code{TRUE})
@@ -159,9 +158,20 @@ setValidity("xtail", .valid_xtail)
 #'
 #' @param ... optional arguments. Currently not used
 #'
+#' @return a \code{DataFrame} with the results or numeric vectors
+#'
 #' @name xtail-accessors
 #'
 #' @aliases resultsTable
+#'
+#' @examples
+#' data(xtailres)
+#' resultsTable(xtailres)
+#' conditions(xtailres)
+#' resultsNum(xtailres)
+#'
+#' # sorting or results
+#' resultsTable(xtailres, sort.by = "pvalue.adjust")
 NULL
 
 #' @rdname xtail-accessors
@@ -305,11 +315,20 @@ summary.xtail <- function(object, alpha = 0.1, ...){
 #'
 #' @param write.args a list of arguments passed onto \code{write.table}
 #'
+#' @return invisible result from \code{write.table}
+#'
 #' @name write.xtail
+#'
+#' @seealso
+#' \code{\link[utils:write.table]{write.table}}
 #'
 #' @importFrom utils write.table
 #'
 #' @export
+#'
+#' @examples
+#' data(xtestres)
+#' write.xtail(xtestres, file = tempfile())
 write.xtail <- function(object, ..., write.args = list()){
     # input check
     if(!is.list(write.args)){

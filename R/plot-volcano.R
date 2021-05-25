@@ -7,7 +7,13 @@
 #'
 #' @param ... optional arguments. Currently not used
 #'
+#' @return a \code{ggplot} object
+#'
 #' @name volcanoPlot
+#'
+#' @examples
+#' data(xtailres)
+#' volcanoPlot(xtailres)
 NULL
 
 #' @rdname volcanoPlot

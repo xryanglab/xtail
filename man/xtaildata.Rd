@@ -3,12 +3,17 @@
 \docType{data}
 \name{xtaildata}
 \alias{xtaildata}
+\alias{xtailres}
 \title{xtail example data}
 \format{
 a list of matrices
+
+an example results
 }
 \usage{
 data(xtestdata)
+
+data(xtailres)
 }
 \description{
 The \code{xtail} package includes some example data

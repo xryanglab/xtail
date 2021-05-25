@@ -14,6 +14,7 @@
 NULL
 
 #' @import methods
+#' @import Rcpp
 #' @useDynLib xtail
 NULL
 
@@ -25,3 +26,7 @@ NULL
 #' @format a list of matrices
 #' @usage data(xtestdata)
 "xtaildata"
+#' @rdname xtaildata
+#' @format an example results
+#' @usage data(xtailres)
+"xtailres"

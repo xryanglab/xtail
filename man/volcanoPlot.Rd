@@ -14,7 +14,14 @@ volcanoPlot(object, ...)
 
 \item{...}{optional arguments. Currently not used}
 }
+\value{
+a \code{ggplot} object
+}
 \description{
 A simple function that plots log2 fold change of TE and -log10 of pvalues
 The genes are color coded by P-value (-log10)
+}
+\examples{
+data(xtailres)
+volcanoPlot(xtailres)
 }

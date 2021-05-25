@@ -13,6 +13,16 @@ write.xtail(object, ..., write.args = list())
 
 \item{write.args}{a list of arguments passed onto \code{write.table}}
 }
+\value{
+invisible result from \code{write.table}
+}
 \description{
 xtail results can be directly written to file using \code{write.xtail}
+}
+\examples{
+data(xtestres)
+write.xtail(xtestres, file = tempfile())
+}
+\seealso{
+\code{\link[utils:write.table]{write.table}}
 }
