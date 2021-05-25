@@ -19,7 +19,7 @@ resultsNum(object, ...)
 
 resultsTable(object, ...)
 
-\S4method{resultsTable}{xtail}(object, sort.by = NULL, log2FCs = FALSE, log2Rs = FALSE)
+\S4method{resultsTable}{xtail}(object, sort.by = NULL, log2FCs = FALSE, log2Rs = FALSE, ...)
 
 summary(object, ...)
 

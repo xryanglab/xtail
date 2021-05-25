@@ -4,14 +4,13 @@
 \alias{write.xtail}
 \title{Write xtail results as table}
 \usage{
-write.xtail(object, ..., write.args = list())
+write.xtail(object, ...)
 }
 \arguments{
 \item{object}{a \code{xtail} object}
 
-\item{...}{arguments passed onto \code{\link[=resultsTable]{resultsTable}}}
-
-\item{write.args}{a list of arguments passed onto \code{write.table}}
+\item{...}{arguments passed onto \code{\link[=resultsTable]{resultsTable}}
+or \code{write.table}. Should be named arguments to avoid clashes.}
 }
 \value{
 invisible result from \code{write.table}

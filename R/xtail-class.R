@@ -210,7 +210,8 @@ setMethod("resultsTable", signature = c(object="xtail"),
     function(object,
              sort.by = NULL,
              log2FCs = FALSE,
-             log2Rs = FALSE){
+             log2Rs = FALSE,
+             ...){
         # input check
         if(!is.logical(log2FCs) || length(log2FCs) != 1L || is.na(log2FCs)){
             stop("'log2FCs' must be TRUE or FALSE",call. = FALSE)
@@ -317,8 +318,7 @@ summary.xtail <- function(object, alpha = 0.1, ...){
 #' @param object a \code{xtail} object
 #'
 #' @param ... arguments passed onto \code{\link[=resultsTable]{resultsTable}}
-#'
-#' @param write.args a list of arguments passed onto \code{write.table}
+#'   or \code{write.table}. Should be named arguments to avoid clashes.
 #'
 #' @return invisible result from \code{write.table}
 #'
@@ -334,12 +334,7 @@ summary.xtail <- function(object, alpha = 0.1, ...){
 #' @examples
 #' data(xtailres)
 #' write.xtail(xtailres, file = tempfile())
-write.xtail <- function(object, ..., write.args = list()){
-    # input check
-    if(!is.list(write.args)){
-        stop("'write.args' must be a list.", call. = FALSE)
-    }
-    #
+write.xtail <- function(object, ...){
     x <- resultsTable(object, ...)
-    do.call(write.table, c(list(x = x),write.args))
+    write.table(x, ...)
 }

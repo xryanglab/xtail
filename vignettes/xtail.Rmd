@@ -106,8 +106,7 @@ write.table(test.tab,"test_results.txt",quote=FALSE,sep="\t")
 We also provide a very simple function, `write.xtail` (using the write.table function), to export the `xtail` result (test.results) to a tab delimited file.
 
 ```{r writextailResult,eval=FALSE}
-write.xtail(test.results,"test_results.txt",
-            write.args = list(quote = FALSE,sep = "\t"))
+write.xtail(test.results, file = "test_results.txt", quote = FALSE, sep = "\t")
 ```
 
 # Visualization
