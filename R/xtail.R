@@ -356,7 +356,7 @@ xtail <- function(mrna,
 }
 
 
-#' @importFrom parallel makeCluster clusterExport detectCores clusterMap
+#' @importFrom parallel makeCluster clusterExport detectCores parLapply
 #'   stopCluster
 #' @importFrom S4Vectors mcols
 #' @importFrom SummarizedExperiment assay colData
@@ -391,13 +391,15 @@ xtail <- function(mrna,
         cluster <- makeCluster(threads)
     }
     on.exit(stopCluster(cluster))
-    clusterExport(cluster,
-                  c("counts1","counts2","intercept1","intercept2","log2Ratio1",
-                    "log2Ratio2","dispersion1","dispersion2","sizefactor1",
-                    "sizefactor2","cond1","cond2","bins","ci",
-                    ".xtail_test_wrapper"),
+    clusterExport(cl = cluster,
+                  varlist = c("counts1","counts2","intercept1","intercept2",
+                              "log2Ratio1","log2Ratio2","dispersion1",
+                              "dispersion2","sizefactor1","sizefactor2","cond1",
+                              "cond2","bins","ci"),
                   envir = environment())
-    res <- clusterMap(cluster, fun = .xtail_test_wrapper, i = seq_len(rowNo));
+    res <- parLapply(cluster,
+                     X = seq_len(rowNo),
+                     fun = .xtail_test_wrapper)
     res <- matrix(unlist(res),
                   ncol = 4L,
                   byrow = TRUE,
@@ -406,23 +408,5 @@ xtail <- function(mrna,
     res <- data.frame(res)
     res$log2Ratio1 <- log2Ratio1
     res$log2Ratio2 <- log2Ratio2
-    res
-}
-
-.xtail_test_wrapper <- function(i){
-    res <- xtail_test(counts1[i,],
-                      counts2[i,],
-                      intercept1[i],
-                      intercept2[i],
-                      log2Ratio1[i],
-                      log2Ratio2[i],
-                      dispersion1[i,],
-                      dispersion2[i,],
-                      sizefactor1,
-                      sizefactor2,
-                      cond1,
-                      cond2,
-                      bins,
-                      ci)
     res
 }

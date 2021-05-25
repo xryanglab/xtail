@@ -16,4 +16,14 @@ test_that("xtail", {
     expect_s3_class(plot,"ggplot")
     plot <- volcanoPlot(xtail)
     expect_s3_class(plot,"ggplot")
+
+    # SummarizedExperiment wrapper
+    se <- SummarizedExperiment(assays = list(mrna = mrna, rpf = rpf),
+                               colData = DataFrame(condition = condition))
+    xtail2 <- runXtail(se, "mrna","rpf",condition = colData(se)$condition,
+                       bins=100, threads = 2)
+    expect_equal(xtail,xtail2)
+    se <- addXtail(se, "mrna","rpf",condition = colData(se)$condition,
+                   bins=100, threads = 2)
+    expect_s4_class(se,"SummarizedExperiment")
 })

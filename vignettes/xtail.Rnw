@@ -7,23 +7,28 @@
 % To compile this document
 % library('knitr');rm(list=ls());knit('xtail.Rnw')
 
-\documentclass[12pt]{article}
+\documentclass{article}
+\usepackage[sc]{mathpazo}
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\ttdefault}{lmtt}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[authoryear]{natbib}
+\usepackage{breakurl}
 
+\makeatletter
 
-<<knitr, echo=FALSE, results="hide">>=
-library("knitr")
-opts_chunk$set(
-  tidy=FALSE,
-  fig.show="hide",
-  cache=FALSE,
-  message=FALSE)
-@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.8}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\floatpagefraction}{0.75}
 
-\title{Genome-wide assessment of differential translations \\ with ribosome profiling data \\-- the xtail package}
-\author{Zhengtao Xiao$^{1-3}$, Qin Zou$^{1,3}$, Yu Liu$^{1-3}$, and Xuerui Yang$^{1-3}$
-\\[1em] \small{$^{1}$MOE Key Laboratory of Bioinformatics, }
-\\ \small{$^{2}$Tsinghua-Peking Joint Center for Life Sciences,}
-\\ \small{$^{3}$School of Life Sciences, Tsinghua University, Beijing 100084, China.}}
+\makeatother
 
 <<<style,eval=TRUE,echo=FALSE,results='asis'>>=
 BiocStyle::latex()
@@ -31,12 +36,31 @@ BiocStyle::latex()
 
 \begin{document}
 
-<<include=FALSE>>=
+<<setup, include=FALSE, cache=FALSE>>=
 library(knitr)
-opts_chunk$set(
-concordance=TRUE
-)
+## set global chunk options
+opts_chunk$set(fig.path='figure/',
+               cache.path='cache/manual-',
+               fig.align='center',
+               fig.show='hold',
+               tidy=FALSE,
+               par=TRUE,
+               message=FALSE,
+               concordance=TRUE,
+               cache=TRUE)
+## I use = but I can replace it with <-; set code/output width to be 68
+options(formatR.arrow=TRUE, width=68, digits=4)
+## tune details of base graphics (https://yihui.org/knitr/hooks)
+knit_hooks$set(par=function(before, options, envir){
+if (before && options$fig.show!='none') par(mar=c(4,4,.1,.1),cex.lab=.95,cex.axis=.9,mgp=c(2,.7,0),tcl=-.3)
+})
 @
+
+\title{Genome-wide assessment of differential translations \\ with ribosome profiling data \\-- the xtail package}
+\author{Zhengtao Xiao$^{1-3}$, Qin Zou$^{1,3}$, Yu Liu$^{1-3}$, and Xuerui Yang$^{1-3}$
+\\[1em] \small{$^{1}$MOE Key Laboratory of Bioinformatics, }
+\\ \small{$^{2}$Tsinghua-Peking Joint Center for Life Sciences,}
+\\ \small{$^{3}$School of Life Sciences, Tsinghua University, Beijing 100084, China.}}
 
 \maketitle
 \vspace{15em}
@@ -150,12 +174,12 @@ In \verb'Xtail', the function \Rfunction{plotFCs} shows the result of the differ
 \end{itemize}
 
 
-<<plotFCs,fig.width=5.5, fig.height=5.5>>=
+<<plotFCs, fig.width=5.5, fig.height=4, include=FALSE>>=
 plotFCs(test.results)
 @
-\begin{figure}[h]
+\begin{figure}
 \centering
-\includegraphics[width=.5\textwidth]{figure/plotFCs-1}
+\includegraphics{figure/plotFCs-1}
 \caption{Scatter plot of log2 fold changes}
 \label{fig:plotFCs}
 \end{figure}
@@ -173,12 +197,12 @@ Similar to \Rfunction{plotFCs}, the function \Rfunction{plotRs} shows the RPF-to
  \item \verb'yellow': for genes whoes \verb'log2R' changing antidirectionally in two conditon.
 \end{itemize}
 
-<<plotRs,fig.width=5.5, fig.height=5.5>>=
+<<plotRs, fig.width=5.5, fig.height=4, include=FALSE>>=
 plotRs(test.results)
 @
-\begin{figure}[h]
+\begin{figure}
 \centering
-\includegraphics[width=.5\textwidth]{figure/plotRs-1}
+\includegraphics{figure/plotRs-1}
 \caption{Scatter plot of log2 RPF-to-mRNA ratios}
 \label{fig:plotRs}
 \end{figure}
@@ -190,12 +214,12 @@ Those genes in which the difference of \verb'log2R' in two conditions did not ex
 
 It can also be useful to evaluate the fold changes cutoff and p values thresholds by looking at the volcano plot. A simple function for making this plot is \Rfunction{volcanoPlot}, in which the \verb'log2FC_TE_final' is plotted on the x-axis and the negative log10 \verb'pvalue_fianl' is plotted on the y-axis (Figure \ref{fig:volcanoplot}).
 
-<<volcanoPlot,fig.width=5.5, fig.height=5.5>>=
+<<volcanoPlot, fig.width=5.5, fig.height=4, include=FALSE>>=
 volcanoPlot(test.results)
 @
-\begin{figure}[h]
+\begin{figure}
 \centering
-\includegraphics[width=.5\textwidth]{figure/volcanoPlot-1}
+\includegraphics{figure/volcanoPlot-1}
 \caption{volcano plot.}
 \label{fig:volcanoplot}
 \end{figure}

@@ -35,6 +35,7 @@ Collate:
     'wrapper-functions.R'
     'estimate-functions.R'
     'xtail.R'
+    'runXtail.R'
     'plot-utils.R'
     'plot-fc.R'
     'plot-r.R'

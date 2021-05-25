@@ -41,3 +41,21 @@
            lambdaSEXP=lambdaSEXP, tolSEXP=tolSEXP, maxitSEXP=maxitSEXP,
            useQRSEXP=useQRSEXP)
 }
+
+.xtail_test_wrapper <- function(X){
+  res <- xtail_test(counts1[X,],
+                    counts2[X,],
+                    intercept1[X],
+                    intercept2[X],
+                    log2Ratio1[X],
+                    log2Ratio2[X],
+                    dispersion1[X,],
+                    dispersion2[X,],
+                    sizefactor1,
+                    sizefactor2,
+                    cond1,
+                    cond2,
+                    bins,
+                    ci)
+  res
+}

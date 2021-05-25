@@ -18,13 +18,7 @@ resultsNum(object, ...)
 
 resultsTable(object, ...)
 
-\S4method{resultsTable}{xtail}(
-  object,
-  sort.by = c("pvalue.adjust", "log2FC_TE_v1", "log2FC_TE_v2", "log2FC_TE_final",
-    "pvalue_v1", "pvalue_v2", "pvalue_final"),
-  log2FCs = FALSE,
-  log2Rs = FALSE
-)
+\S4method{resultsTable}{xtail}(object, sort.by = NULL, log2FCs = FALSE, log2Rs = FALSE)
 
 summary.xtail(object, alpha = 0.1, ...)
 }

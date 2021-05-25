@@ -32,7 +32,6 @@ setClass("xtail",
     res
 }
 
-
 #' @importFrom stats p.adjust
 .adjust_p <- function(res, method){
     res$pvalue.adjust <- p.adjust(res$pvalue_final, method = method)
@@ -199,9 +198,7 @@ setGeneric("resultsTable",
 #' @export
 setMethod("resultsTable", signature = c(object="xtail"),
     function(object,
-             sort.by = c("pvalue.adjust", "log2FC_TE_v1", "log2FC_TE_v2",
-                         "log2FC_TE_final", "pvalue_v1" , "pvalue_v2",
-                         "pvalue_final"),
+             sort.by = NULL,
              log2FCs = FALSE,
              log2Rs = FALSE){
         # input check
@@ -211,45 +208,47 @@ setMethod("resultsTable", signature = c(object="xtail"),
         if(!is.logical(log2Rs) || length(log2Rs) != 1L || is.na(log2Rs)){
             stop("'log2Rs' must be TRUE or FALSE",call. = FALSE)
         }
-        sort.by <- match.arg(sort.by, c("pvalue.adjust", "log2FC_TE_v1",
-                                        "log2FC_TE_v2", "log2FC_TE_final",
-                                        "pvalue_v1" , "pvalue_v2",
-                                        "pvalue_final"))
         #
         x <- object$resultsTable
-        # sort
-        #absolute TE fold change.
-        if(sort.by %in% c("log2FC_TE_v1","log2FC_TE_v2","log2FC_TE_final")){
-            tefc <- abs(x[[sort.by]])
-        } else {
-            tefc <- abs(x[["log2FC_TE_final"]])
-        }
+        if(!is.null(sort.by)){
+            sort.by <- match.arg(sort.by, c("pvalue.adjust", "log2FC_TE_v1",
+                                            "log2FC_TE_v2", "log2FC_TE_final",
+                                            "pvalue_v1" , "pvalue_v2",
+                                            "pvalue_final"))
+            # sort
+            #absolute TE fold change.
+            if(sort.by %in% c("log2FC_TE_v1","log2FC_TE_v2","log2FC_TE_final")){
+                tefc <- abs(x[[sort.by]])
+            } else {
+                tefc <- abs(x[["log2FC_TE_final"]])
+            }
 
-        #pvalue order
-        if(sort.by %in% c("pvalue_v1","pvalue_v2","pvalue_final", "pvalue.adjust")) {
-            pvfc <- object$resultsTable[[sort.by]]
-        }
+            #pvalue order
+            if(sort.by %in% c("pvalue_v1","pvalue_v2","pvalue_final", "pvalue.adjust")) {
+                pvfc <- object$resultsTable[[sort.by]]
+            }
 
-        # out
-        o <- switch(sort.by,
-                    "log2FC_TE_v1" = order(tefc, decreasing = TRUE),
-                    "log2FC_TE_v2" = order(tefc, decreasing = TRUE),
-                    "log2FC_TE_final" = order(tefc, decreasing = TRUE),
-                    "pvalue_v1" = order(pvfc, -tefc),
-                    "pvalue_v2" = order(pvfc, -tefc),
-                    "pvalue_final" = order(pvfc, -tefc),
-                    "pvalue.adjust" = order(pvfc, -tefc)
-        )
-        x <- x[o,]
+            # out
+            o <- switch(sort.by,
+                        "log2FC_TE_v1" = order(tefc, decreasing = TRUE),
+                        "log2FC_TE_v2" = order(tefc, decreasing = TRUE),
+                        "log2FC_TE_final" = order(tefc, decreasing = TRUE),
+                        "pvalue_v1" = order(pvfc, -tefc),
+                        "pvalue_v2" = order(pvfc, -tefc),
+                        "pvalue_final" = order(pvfc, -tefc),
+                        "pvalue.adjust" = order(pvfc, -tefc)
+            )
+            x <- x[o,]
+        }
         # remove deselected columns
         if (!log2Rs){
-          cond <- paste0(conditions(object), "_log2TE")
-          x[[cond[1L]]] <- NULL
-          x[[cond[1L]]] <- NULL
+            cond <- paste0(conditions(object), "_log2TE")
+            x[[cond[1L]]] <- NULL
+            x[[cond[1L]]] <- NULL
         }
         if (!log2FCs){
-          x$mRNA_log2FC <- NULL
-          x$RPF_log2FC <- NULL
+            x$mRNA_log2FC <- NULL
+            x$RPF_log2FC <- NULL
         }
         #
         x
@@ -267,13 +266,13 @@ setMethod("resultsTable", signature = c(object="xtail"),
                   na.rm = TRUE)
     down_num <- sum(table$log2FC_TE_final < 0 & table$pvalue.adjust < alpha,
                     na.rm = TRUE)
-    cat("A xtail Object:\n")
-    cat("The total number of gene is:", all_num,"\n")
+    cat("A xtail object:\n")
+    cat("Number of genes tested:", all_num,"\n")
     cat("Number of the log2FC and log2R used in determining the final p-value:\n")
     cat("     log2FC:", nums["numFoldChange"],"\n")
     cat("     log2R :", nums["numRatio"],"\n")
     cat("\n")
-    cat("adjusted pvalue < ", alpha, "\n")
+    cat("Number of result with adjusted pvalue < ", alpha, "\n")
     cat("     log2FC_TE > 0 (up)  :", up_num, "\n")
     cat("     log2FC_TE < 0 (down):", down_num,"\n")
 }
