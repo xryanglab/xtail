@@ -24,7 +24,7 @@ The purpose of this package is to identify the genes undergoing differential tra
 
 # INSTALLATION
 
-To install Xtail, please refer to INSTALL file in this directory. We also prepare docker image for xtail, please refer to this [page](https://hub.docker.com/r/yanglab/xtail)
+To install Xtail, please refer to INSTALL file in this directory. We also have prepared a docker image of xtail, please refer to this [page](https://hub.docker.com/r/yanglab/xtail).
 
 # CONTENTS
 
