@@ -1,19 +1,62 @@
 Package: xtail
 Type: Package
-Title: Genome-wide assessment of differential translations with
-        ribosome profiling data
-Version: 1.1.5
-Date: 2016-05
-Author: Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
-Maintainer: Zhengtao Xiao <xzt13@tsinghua.org.cn>; Rongyao Huang <THUhry12@163.com>
-Description: The purpose of this package is to discover the genes undergoing differential translation across two different experiment conditions
-							using both RNA-seq data and ribosom profiling data.
-VignetteBuilder: knitr
-Depends: DESeq2
-Imports: parallel, Rcpp (> 0.10.1), genefilter
-Suggests: knitr, BiocStyle
-LinkingTo: Rcpp, RcppArmadillo
-License: GPL (>= 3)
-URL: https://github.com/xryanglab/xtail
+Title: Genome-wide assessment of differential translations with ribosome profiling data
+Version: 1.2.0
+Authors@R:
+    c(person("Zhengtao", "Xiao", email="xzt13@tsinghua.org.cn",
+             role = c("aut","cre")),
+      person("Qin", "Zou", role = "aut"),
+      person("Yu", "Liu", role = "aut"),
+      person("Xuerui", "Yang", role = "aut"),
+      person("Rongyao", "Huang", email = "THUhry12@163.com", role = "ctb"))
+Description: 
+    The xtail package implements the method of the same name to discover the 
+    genes undergoing differential translation across two different experiment 
+    conditions using both RNA-seq data and ribosome profiling data. For 
+    estimation the method relies on DESeq2. For visualizing the results
+    plotting functions are available as well.
+License:
+    GPL (>= 3) | file LICENSE
+Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2016-05
+biocViews: 
+    Software, DifferentialExpression
+Depends:
+    R (>= 4.0), 
+    DESeq2,
+    S4Vectors,
+    BiocGenerics
+Imports:
+    methods,
+    stats,
+    utils,
+    parallel,
+    Rcpp (> 0.10.1),
+    matrixStats,
+    SummarizedExperiment,
+    locfit,
+    ggplot2
+Suggests:
+    knitr,
+    rmarkdown,
+    BiocStyle,
+    testthat
+Collate:
+    'xtail-package.R'
+    'xtail-class.R'
+    'RcppExports.R'
+    'wrapper-functions.R'
+    'estimate-functions.R'
+    'xtail.R'
+    'runXtail.R'
+    'plot-utils.R'
+    'plot-fc.R'
+    'plot-r.R'
+    'plot-volcano.R'
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
+VignetteBuilder: knitr
+URL: https://github.com/xryanglab/xtail
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1

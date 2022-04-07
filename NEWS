@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.2.0
+************************
+=> fixed issue for R 4.0
+=> added SummarizedExperiment wrapper functions
+
 CHANGES IN VERSION 1.1.5
 ************************
 => add citations for xtail.
