@@ -5,16 +5,19 @@ Genome-wide assessment of differential translations with ribosome profiling data
 
 # VERSION
 
-1.1.5
+1.2.0
 
 # Authors
 
-Zhengtao Xiao, Qin Zou, Yu Liu and Xuerui Yang
+Zhengtao Xiao
 
 # DESCRIPTION
 
-The purpose of this package is to identify the genes undergoing differential translation across two conditions with ribosome profiling data.
-​							
+The xtail package is designed to identify genes exhibiting differential translation 
+between two experimental conditions by simultaneously analyzing changes in RNA-seq 
+and ribo-seq data. The estimation of changes in read counts are performed 
+using the DESeq2 package.
+
 # REQUIREMENTS
 
 * R >= 3.2
@@ -24,7 +27,8 @@ The purpose of this package is to identify the genes undergoing differential tra
 
 # INSTALLATION
 
-To install Xtail, please refer to INSTALL file in this directory. We also have prepared a docker image of xtail, please refer to this [page](https://hub.docker.com/r/yanglab/xtail).
+Details of the installation process can be found in the INSTALL file located in the root directory of the package.
+Additionally, a Docker image of xtail is available; please refer to this [page](https://hub.docker.com/r/yanglab/xtail) for more information.
 
 # CONTENTS
 
@@ -40,10 +44,4 @@ or type: vignette("xtail") at the R-prompt.
 Xtail is licensed under the GPL version 3 or any later version
 
 
-For more information please contact  xzt13[at]tsinghua.org.cn and THUhry12[at]163.com
-
-
-
-
-
-
+For more information please contact  xzt13[at]xjtu.edu.cn

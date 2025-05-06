@@ -2,6 +2,7 @@ CHANGES IN VERSION 1.2.0
 ************************
 => fixed issue for R 4.0
 => added SummarizedExperiment wrapper functions
+=> Fixed Error: logical subscript contains NAs
 
 CHANGES IN VERSION 1.1.5
 ************************

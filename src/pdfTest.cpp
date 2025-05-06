@@ -31,11 +31,11 @@ NumericVector cond){
 
 // [[Rcpp::export]]
 Rcpp::NumericVector probMatrix(Rcpp::NumericVector x, Rcpp::NumericVector y, Rcpp::NumericVector side){
-    // Xtail generates a joint probability matrix by multiplying two probability density dsitributions. 
-    // This return pvalue, 
+    // Xtail generates a joint probability matrix by multiplying two probability density dsitributions.
+    // This return pvalue,
 
     double pmax = 0;
-    int pmaxi = 0; //max probability index 
+    int pmaxi = 0; //max probability index
     double drecord = 0;
     double s = 0; // 2*s is final pvalue
     NumericVector ret(2);
@@ -122,14 +122,14 @@ Rcpp::NumericVector probMatrix(Rcpp::NumericVector x, Rcpp::NumericVector y, Rcp
 
 // [[Rcpp::export]]
 NumericVector probMatrixCI(NumericVector x, NumericVector y, NumericVector side, NumericVector ci){
-    // Xtail generates a joint probability matrix by multiplying two probability density dsitributions. 
+    // Xtail generates a joint probability matrix by multiplying two probability density dsitributions.
     // This return pvalue and CI
 
     double pmax = 0;
-    int pmaxi = 0; //max probability index 
+    int pmaxi = 0; //max probability index
     double drecord = 0;
     double s = 0; // 2*s is final pvalue
-    double drecords = 0; 
+    double drecords = 0;
 
     NumericVector ret(4); // return index of betas, pvalue,lowCI index, highCI index.
     int lowCI = -1;
@@ -265,10 +265,10 @@ NumericVector probMatrixCI(NumericVector x, NumericVector y, NumericVector side,
 
 // [[Rcpp::export]]
 NumericVector boundFC(NumericVector k1, NumericVector alpha1, NumericVector intercept1,
-    NumericVector sf1, NumericVector FC1, NumericVector cond1, NumericVector k2,  
+    NumericVector sf1, NumericVector FC1, NumericVector cond1, NumericVector k2,
     NumericVector alpha2, NumericVector intercept2, NumericVector sf2, NumericVector FC2,
     NumericVector cond2, NumericVector stepFC, NumericVector toleration){
-    	
+
     NumericVector ret(2);
 
     //left side
@@ -333,7 +333,7 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
 
 
     NumericVector ret(4); // deltaTE,  pval, ci_low, ci_high
-    if (isnan(log2FC_1[0]) || isnan(log2FC_2[0])){
+    if (std::isnan(static_cast<double>(log2FC_1[0])) || std::isnan(static_cast<double>(log2FC_2[0]))){
         ret[1] = NA_REAL;
         ret[0] = NA_REAL;
         ret[2] = NA_REAL;
@@ -358,7 +358,7 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
 
     NumericVector side(1);
     side[0] = log2FC_1[0] - log2FC_2[0];
-   
+
     if (ci[0] == 0){
         NumericVector retValues = probMatrix(log2_density1, log2_density2, side);
         if(retValues[0] >= 0){
@@ -386,7 +386,7 @@ NumericVector xtail_test(NumericVector k1, NumericVector k2, NumericVector ints1
         ret[1] = retValues[1];
         //lowCI = retValues[2];
         //highCI = retValues[3];
-        // lowCI       
+        // lowCI
         if (retValues[2]>=0){
             highCI = betas[0] - betas[retValues[2]];
         }else{

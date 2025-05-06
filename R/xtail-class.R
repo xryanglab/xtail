@@ -64,14 +64,17 @@ setClass("xtail",
     res[na_result,"pvalue_final"] <- NA
     # fold change better than ratio
     fc_result <- res$pvalue_v1 > res$pvalue_v2
-    log2FC_determine_num <- sum(fc_result)
+    fc_result[is.na(fc_result)] <- FALSE
+    log2FC_determine_num <- sum(!is.na(fc_result))
     res[fc_result,"log2FC_TE_final"] <- res[fc_result,"log2FC_TE_v1"]
     res[fc_result,"pvalue_final"] <- res[fc_result,"pvalue_v1"]
     # ratio better than fold change
     ratio_result <- res$pvalue_v1 <= res$pvalue_v2
-    log2R_determine_num <- sum(ratio_result)
+    ratio_result[is.na(ratio_result)] <- FALSE
+    log2R_determine_num <- sum(!is.na(ratio_result))
     res[ratio_result,"log2FC_TE_final"] <- res[ratio_result,"log2FC_TE_v2"]
     res[ratio_result,"pvalue_final"] <- res[ratio_result,"pvalue_v2"]
+
     #
     if(ci > 0){
         CI_string = paste0("CI(",100*ci,"%)")

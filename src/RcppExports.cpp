@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // fitBeta2
 Rcpp::List fitBeta2(SEXP ySEXP, SEXP xSEXP, SEXP nfSEXP, SEXP alpha_hatSEXP, SEXP contrastSEXP, SEXP beta_matSEXP, SEXP lambdaSEXP, SEXP tolSEXP, SEXP maxitSEXP, SEXP useQRSEXP);
 RcppExport SEXP _xtail_fitBeta2(SEXP ySEXPSEXP, SEXP xSEXPSEXP, SEXP nfSEXPSEXP, SEXP alpha_hatSEXPSEXP, SEXP contrastSEXPSEXP, SEXP beta_matSEXPSEXP, SEXP lambdaSEXPSEXP, SEXP tolSEXPSEXP, SEXP maxitSEXPSEXP, SEXP useQRSEXPSEXP) {
