@@ -44,4 +44,4 @@ or type: vignette("xtail") at the R-prompt.
 Xtail is licensed under the GPL version 3 or any later version
 
 
-For more information please contact  xzt13[at]xjtu.edu.cn
+For more information please contact  zhengtao.xiao[at]xjtu.edu.cn
